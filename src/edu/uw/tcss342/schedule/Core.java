@@ -11,5 +11,15 @@ package edu.uw.tcss342.schedule;
  * Time: 4:05 PM
  */
 public class Core {
+    private Cell[][] storage;
 
+
+
+    public String convertPoint(int x, int y) {
+        //get dependencies
+        //make dep graph
+        //topo sort
+            //evaluate points, pass calculated values
+        return "";
+    }
 }
