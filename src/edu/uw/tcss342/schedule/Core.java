@@ -11,7 +11,8 @@ package edu.uw.tcss342.schedule;
  * Time: 4:05 PM
  */
 public class Core {
-    private Cell[][] storage;
+    private Cell[] storage;
+    //edit
 
 
 
