@@ -1,9 +1,7 @@
 package edu.uw.tcss342.schedule;
 
 import java.awt.*;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Cell representation in HW6B Spreadsheet. Immutable.
@@ -19,17 +17,35 @@ import java.util.Set;
  */
 public class Cell {
     String formula;
+    String id;
+    double last_value;
+    int column;
+    int row;
     Set<String> dependencies;
 
-    public Cell(final String formula) {
+    public Cell(final Point column_row, final String formula) {
+        this.column = column_row.x;
+        this.row = column_row.y;
+        this.id = "colrow"; //TODO: Interpret this based on columnn_row
         this.formula = formula;
-        //calculate dependencies
         dependencies = new HashSet<String>();
+        calculateDependencies();
+    }
+
+    public Cell(final String id, final String formula) {
+        this.id = id;
+        this.formula = formula;
+        dependencies = new HashSet<String>();
+        calculateDependencies();
     }
 
     public Double evaluate(Map<String,Double> dep_values) {
         //return result, given values for dependencies
         return null;
+    }
+
+    public Double lastValue() {
+        return last_value;
     }
 
     /**
@@ -40,6 +56,33 @@ public class Cell {
         //return calculated dependencies
         return new HashSet<String>();
     }
+
+    public String toString() {
+        return getFormula();
+    }
+
+    public String getFormula() {
+        return formula;
+    }
+
+    public String getID() {
+        return id;
+    }
+
+    public Point getColumnRow() {
+        //TODO: Make this return the correct point
+        return new Point();
+    }
+
+
+    private void calculateDependencies() {
+        dependencies.clear(); //empty result space
+
+
+    }
+
+
+
 
 
     public static Point convertString(String identifier) {
@@ -57,4 +100,13 @@ public class Cell {
         //evaluate points, pass calculated values
         return "";
     }
+
+
+
+
+
+
+
+    //token stuff
+    public interface Token
 }
