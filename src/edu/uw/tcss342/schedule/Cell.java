@@ -1,7 +1,9 @@
 package edu.uw.tcss342.schedule;
 
+
 import java.awt.*;
 import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * Cell representation in HW6B Spreadsheet. Immutable.
@@ -27,16 +29,16 @@ public class Cell {
         this.column = column_row.x;
         this.row = column_row.y;
         this.id = "colrow"; //TODO: Interpret this based on columnn_row
-        this.formula = formula;
+        this.formula = formula.trim();
         dependencies = new HashSet<String>();
-        calculateDependencies();
+        parse();
     }
 
     public Cell(final String id, final String formula) {
         this.id = id;
         this.formula = formula;
         dependencies = new HashSet<String>();
-        calculateDependencies();
+        parse();
     }
 
     public Double evaluate(Map<String,Double> dep_values) {
@@ -75,12 +77,37 @@ public class Cell {
     }
 
 
-    private void calculateDependencies() {
+    private void parse() {
         dependencies.clear(); //empty result space
 
-
+        Queue<Token> output_queue = new LinkedList<Token>();
+        Stack<Token> workspace_stack = new Stack<Token>();
+        String remaining = formula; //copy trimmed formula into workspace
+        remaining = remaining.replaceAll(" ",""); //kill all whitespace
+        int index = 0; //where are we in the process?
+        char ch = ' ';
+        while(!remaining.isEmpty()) { //while we aren't done (while there are tokens to be read)
+            remaining = parseToken(remaining,output_queue,workspace_stack);
+        }
     }
 
+    /**
+     *
+     * @param remainder The index to look for the start of the token at
+     * @param output_queue the queue of tokens
+     * @return the new index
+     */
+    private String parseToken(String remainder,Queue<Token> output_queue,Stack<Token> workspace_stack) {
+        Pattern cell = Pattern.compile("^[A-Z]+[0-9]+");
+        Pattern token;
+        Pattern literal = Pattern.compile("^[-]?[0-9]+");
+        //determine type of next token and add to appropriate stack
+            //literal
+            //cell
+            //operator (unary,binary,association)
+            //function
+        return null;
+    }
 
 
 
@@ -108,5 +135,55 @@ public class Cell {
 
 
     //token stuff
-    public interface Token
+    /** Map<Operator,Operation> **/
+    private Map<String,OperatorToken> operators = new HashMap<String,OperatorToken>();
+
+
+    private static interface Token {}
+    private static class LiteralToken implements Token {
+        public LiteralToken(final double value) {
+            this.value = value;
+        }
+        double value;
+    }
+    private static interface OperatorToken extends Token {}
+    private static interface BinaryOperatorRunnable extends OperatorToken {
+        /** @return True if left associative, false if right associative. */
+        boolean leftAssociative();
+        /** Performs the operation for this operator **/
+        double run(double left, double right);
+    }
+    private static interface UnaryOperatorRunnable extends OperatorToken {
+        /** Performs the operation for this operator **/
+        double run(double value);
+    }
+
+    public static class CellToken implements Token {
+        int column;
+        int row;
+        String identifier;
+        public CellToken(final String identifier) {
+            this.identifier = identifier.toUpperCase();
+            String temp_ident_remain = this.identifier;
+            column = 0; //init column
+            //calculate column
+            while(temp_ident_remain.matches("^[A-Z].*")) { //starts with character
+                //gets value of char, 10-35
+                int value = Character.getNumericValue(temp_ident_remain.charAt(0));
+
+                //get value from letter
+                value = value - 9;
+
+                //add to value
+                column *= 26;
+                column += value;
+                temp_ident_remain = temp_ident_remain.substring(1);
+            }
+            row = Integer.parseInt(temp_ident_remain); //the match
+        }
+
+        public String toString() {
+            return identifier + " (" + column + "," + row + ")";
+        }
+    }
 }
