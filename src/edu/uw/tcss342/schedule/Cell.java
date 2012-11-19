@@ -18,6 +18,8 @@ import java.util.regex.Pattern;
  * To change this template use File | Settings | File Templates.
  */
 public class Cell {
+    /** Topo Sort workspace variable **/
+    public int inDegree;
     String formula;
     String id;
     double last_value;
