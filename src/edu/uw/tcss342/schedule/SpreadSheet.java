@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Observable;
 import java.util.Queue;
+import java.util.Set;
 
 /**
  * HW6B Spreadsheet.
@@ -24,28 +25,17 @@ import java.util.Queue;
 public class SpreadSheet extends Observable{
     private List<Cell> activeCells;
     
-    //A vertexMap field that stores maps the cell's name to the Cell Object
+    //Maps the Cell's name to the Cell Object
     private Map<String, Cell> cellMap = new HashMap<String, Cell>();
     
-    private int my_rows;
+    //Maps a Cell's name to the resulting value it evaluates to 
+    private Map<String, Double> cellValues = new HashMap<String, Double>();
     
-    private int my_columns;
+    //The adjacency list used in topological sort
+    private HashMap<String, List<String>> adjList;;
     
-    public SpreadSheet(final int the_rows, final int the_columns)
-    {
-    	my_rows = the_rows;
-    	my_columns = the_columns;
-    }
-    
-    public int getNumColumns()
-    {
-    	return my_columns;
-    }
-    
-    public int getNumRows()
-    {
-    	return my_rows;
-    }
+	private Queue<Cell> cellEvalQueue;
+
     
     /*
      * Called by the GUI every time a single Cell has been created or altered.  The spreadsheet will
@@ -64,22 +54,25 @@ public class SpreadSheet extends Observable{
      */
     public void updateCell(final String the_name, final String the_formula)
     {   	
-    	Cell tempCell = cellMap.get(the_name);
-    	//if the Cell isn't in the map yet i.e. the name associated with the Cell hasn't yet been modified
-    	//from original state of 0.
-    	if (tempCell == null)
+    	//removes the Cell from the map according to the key (name) of the Cell if the_formula = "0" or "".
+    	if (the_formula.equals("0") || the_formula.equals(""))
     	{
-    		tempCell = new Cell(the_name, the_formula);
-    		cellMap.put(the_name, tempCell);
+    		cellMap.remove(the_name);
     	}
-    	//if the Cell is already in the map, the Cell is updated by being replaced with a new Cell that is
-    	//associated with the Cell's name and has the updated value.
+    	
+    	//if the Cell isn't in the map yet i.e. the name associated with the Cell hasn't yet been modified
+    	//from original state of 0.  if the Cell is already in the map, the Cell is updated by being 
+    	//replaced with a new Cell that is associated with the Cell's name and has the updated value.
     	else
     	{
-    		tempCell = new Cell(the_name, the_formula);
-    		cellMap.put(the_name, tempCell);
+        	Cell tempCell = new Cell(the_name, the_formula);
+        	cellMap.put(the_name, tempCell);
     	}
+   	
+    	buildAdjList();
     	topologicalSort();
+    	evaluateCells();
+    	updateSpreadSheet();
     }
     
     /*
@@ -103,13 +96,54 @@ public class SpreadSheet extends Observable{
 		return returnCells;	
     }
     
+    public void reset()
+    {
+    	activeCells.clear();
+    	cellMap.clear();
+    	cellValues.clear();
+    	adjList.clear();
+    	cellEvalQueue.clear();
+    	updateSpreadSheet();
+    }
+    
+    /*
+     * Builds an adjacency list based on the dependencies associated with each cell and adds them to
+     * the Map<String, list<Cell>> adjList.
+     */
+    private void buildAdjList()
+    { 	
+    	//First, add the all the keys to the adjList, with null values for the List of adjacent Cell names
+    	List<String> cellNames = new ArrayList<String>(cellMap.keySet());
+    	adjList = new HashMap<String, List<String>>();
+    	for (String s : cellNames)
+    	{
+    		adjList.put(s, null);
+    	}
+    	
+    	/*Second, iterate through every Cell in the cellMap. For each Cell in the cellSet, take note of the
+    	 *Cell's name, then go to every key value in the adjList that matches the dependent Cell's name
+    	 *and add the destination Cell's name to the list of dependencies. 
+    	 */
+    	Collection<Cell> cellSet = cellMap.values();
+    	for (Cell c : cellSet)
+    	{
+    		for (String s : c.dependencies)
+    		{
+    			adjList.get(s).add(c.id);
+    			//calculates the inDegree of the dependent Cell
+    			cellMap.get(c.id).inDegree++;
+    		}   		
+    	}
+    }
+    
     /*
      * Performs the topological sort on the List<Cell> in the spreadsheet
      * (Taken from Weiss p.559)
      */
     private void topologicalSort()
     {
-    	//finds a Cell with inDegree of 0 and assigns it to the startName variable
+    	//finds a Cell with inDegree of 0 and assigns it to the startName variable which assigns
+    	//the first Cell to be executed (startCell).
     	Collection<Cell> cellIndegreeSet = cellMap.values();
     	String startName = "not found";  //the name of the Cell that has indegree 0 assigned above.
     	for (Cell c : cellIndegreeSet)
@@ -117,18 +151,17 @@ public class SpreadSheet extends Observable{
     		{
     			startName = c.getID();
     		}
-    	Cell start = cellMap.get(startName);
+    	Cell startCell = cellMap.get(startName);
     	
-    	//if there was no cell with an inDegree of 0, will throw this exception.
-    	if (start == null)
+    	//if there was no cell with an inDegree of 0, throw this exception.
+    	if (startCell == null)
     	{
-    		throw new NoSuchElementException("Start Cell not found");
+    		throw new SpreadSheetException("Start Cell not found");
     	}
     	
-    	//Compute the inDegrees and add to the Queue in the order they should be calculated.
-    	clearAll();
+    	//Add Cells to the Queue in the order they should be calculated.
     	Queue<Cell> cellQueue = new LinkedList<Cell>();
-    	Queue<Cell> cellEvalQueue = new LinkedList<Cell>();
+    	cellEvalQueue = new LinkedList<Cell>();
     	Collection<Cell> cellSet = cellMap.values();
     	for (Cell c : cellSet)
     		if (c.inDegree == 0)
@@ -143,37 +176,44 @@ public class SpreadSheet extends Observable{
     		Cell currentCell = cellQueue.remove();
     		cellEvalQueue.add(currentCell);
     		//for each adjacent Cell in the current Cell's list of adjacent Cells, evaluate the inDegree
-    		for ( Cell adjCell : currentCell.adjacent)
+    		for ( String adjCell : adjList.get(currentCell.id))
     		{
-    			Cell dest = adjCell; //evaluate each adjacent Cell
-    			if (--dest.inDegree == 0)  //if the current adjacent Cell being evaluated now has 
-    									   //inDegree = 0, add it to the cellQueue so it can be evaluated
-    									   //next
-	    			cellQueue.add(dest);
+    			cellMap.get(adjCell).inDegree--;
+				//if the current adjacent Cell being evaluated now has inDegree = 0, add it to the 
+    			//cellQueue so it can be evaluated next.
+    			if (cellMap.get(adjCell).inDegree == 0)  
+    			{
+	    			cellQueue.add(cellMap.get(adjCell));	
+    			}
     		}
     		if (iterations != cellMap.size())
     			throw new SpreadSheetException("Spreadsheet has a cycle");
     	}
-    	
-    	/*TODO  The cellEvalQueue now has all Cells queued up in the order they should be evaluated.
-    	 * 		Need to write code to evaluate the Cells and add them to the list of activeCells.
-    	 */
     }
     
-    private void clearAll()
+    /*
+     * References the cellMap of existing Cells to be evaluated. Evaluates the Cells in the order they
+     * are organized in the cellEvalQueue and stores the resultant Cells in the activeCells List. 
+     */
+    private void evaluateCells()
     {
-    	for (Cell c : cellMap.values())
-    		c.inDegree = 0;
-    }
-
-    
-
-    public String convertPoint(int x, int y) {
-        //get dependencies
-        //make dep graph
-        //topo sort
-            //evaluate points, pass calculated values
-        return "";
+    	//Assigns the first Cell's id and value into the cellValues Map.
+    	Cell firstCell = cellEvalQueue.remove();
+    	cellValues.put(firstCell.id, firstCell.last_value);
+    	
+    	//Iterates down the cellEvalQueue in order 
+    	for (int i = cellEvalQueue.size(); i > 0; i--)
+    	{
+    		Cell currentCell = cellEvalQueue.remove();
+    		currentCell.evaluate(cellValues);
+    		cellValues.put(currentCell.id, currentCell.last_value);
+    	}
+    	activeCells.clear();
+    	Collection<Cell> cellSet = cellMap.values();
+    	for (Cell c : cellSet)
+    	{
+    		activeCells.add(c);
+    	}
     }
 }
 
@@ -194,23 +234,9 @@ class SpreadSheetException extends RuntimeException
 
 /*
  * Current Issues:
- * 		Need adjacent field in Cell
- * 			-public List<Cell> adjacent;  //adjacent vertices (Cells)  The list of dependencies.
- * 			-Can this be done?  Can the Cell class have within it a List<Cell>?  If not, need to modify the
- * 				SpreadSheet code.  Establish what the list of adjacent is going to be.  Set<String>?
- * 		Need to sort out the constuctor in Cell
- * 			-why do we need a Point object for the name?  I was WRONG!  It is much simplier to simply
+ * 		Need to sort out the constructor in Cell
+ * 			-why do we need a Point object for the name?  I was WRONG!  It is much simpler to simply
  * 			 refer to it as a String, name
  * 			-my suggestion for a constructor
  * 				 public Cell(final String name, final String formula)
- * 		CellToken Stuff.  Do we need it, who will create it?
- * 			-seperate classes exactly like layed out in the directions?
- * 		Should we add a clone method to Cell? In my getActiveCells() method, I'm returning an ArrayList<Cell>
- * 			that is a copy of the LinkedList<Cell> that is just a container in my SpreadSheet class to 
- * 			hold all the Cells after the calculations have been performed.  I think the text book answer is 
- * 			to clone each Cell individually, add them to the new list and then return that.  That means
- * 			I need to write up a proper clone method in Cell to copy each field individually example here:
- * 			http://stackoverflow.com/questions/7042182/how-to-make-a-deep-copy-of-java-arraylist
- * 			
- * 			I can do this, just need you guy's go-ahead for the work.
- */
+*/
