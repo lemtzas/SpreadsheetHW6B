@@ -59,16 +59,16 @@ public class SpreadSheet extends Observable{
     	{
     		cellMap.remove(the_name);
     	}
-    	
+
     	//if the Cell isn't in the map yet i.e. the name associated with the Cell hasn't yet been modified
     	//from original state of 0.  if the Cell is already in the map, the Cell is updated by being 
     	//replaced with a new Cell that is associated with the Cell's name and has the updated value.
     	else
     	{
+    		
         	Cell tempCell = new Cell(the_name, the_formula);
         	cellMap.put(the_name, tempCell);
     	}
-   	
     	buildAdjList();
     	topologicalSort();
     	evaluateCells();
@@ -96,7 +96,12 @@ public class SpreadSheet extends Observable{
 		return returnCells;	
     }
     
-    public void reset()
+    public Map<String, Cell> getCellMap()
+    {
+    	return cellMap;
+    }
+
+	public void reset()
     {
     	activeCells.clear();
     	cellMap.clear();
