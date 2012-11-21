@@ -55,7 +55,7 @@ public class Cell {
                     Double right = values.pop();
                     values.push(bot.operation.run(left,right));
                 }
-            }
+            }                                                                                                           //TODO: Function Tokens
         }
         if(values.empty()) throw new IllegalStateException("Invalid Formula");
         return values.pop();
@@ -84,11 +84,6 @@ public class Cell {
 
     public String getID() {
         return id;
-    }
-
-    public Point getColumnRow() {
-        //TODO: Make this return the correct point
-        return new Point();
     }
 
 
@@ -182,26 +177,6 @@ public class Cell {
             //function
         return remainder.substring(match.length());
     }
-
-
-
-
-    public static Point convertString(String identifier) {
-        return new Point();
-    }
-
-    public static String convertPoint(Point p){
-        return convertPoint(p.x,p.y);
-    }
-
-    public static String convertPoint(int x, int y) {
-        //get dependencies
-        //make dep graph
-        //topo sort
-        //evaluate points, pass calculated values
-        return "";
-    }
-
 
 
 
