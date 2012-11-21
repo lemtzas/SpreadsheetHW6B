@@ -1,7 +1,7 @@
 package edu.uw.tcss342.schedule;
 
 
-import com.sun.javaws.exceptions.InvalidArgumentException;
+//import com.sun.javaws.exceptions.InvalidArgumentException;
 
 import java.awt.*;
 import java.util.*;
@@ -109,7 +109,7 @@ public class Cell {
         while(!output_queue.isEmpty())
             sb.append(" ").append(output_queue.poll().toString());
 
-        System.out.println(formula + " = " + sb);
+//        System.out.println(formula + " = " + sb);
     }
 
     /**

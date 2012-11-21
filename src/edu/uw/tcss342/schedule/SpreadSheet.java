@@ -1,13 +1,11 @@
 package edu.uw.tcss342.schedule;
 
-import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Observable;
 import java.util.Queue;
 import java.util.Set;
@@ -32,7 +30,7 @@ public class SpreadSheet extends Observable{
     private Map<String, Double> cellValues = new HashMap<String, Double>();
     
     //The adjacency list used in topological sort
-    private HashMap<String, List<String>> adjList;;
+    private HashMap<String, List<String>> adjList;
     
 	private Queue<Cell> cellEvalQueue;
 
@@ -65,14 +63,13 @@ public class SpreadSheet extends Observable{
     	//replaced with a new Cell that is associated with the Cell's name and has the updated value.
     	else
     	{
-    		
         	Cell tempCell = new Cell(the_name, the_formula);
         	cellMap.put(the_name, tempCell);
     	}
     	buildAdjList();
-    	topologicalSort();
-    	evaluateCells();
-    	updateSpreadSheet();
+//    	topologicalSort();
+//    	evaluateCells();
+//    	updateSpreadSheet();
     }
     
     /*
@@ -122,22 +119,47 @@ public class SpreadSheet extends Observable{
     	adjList = new HashMap<String, List<String>>();
     	for (String s : cellNames)
     	{
-    		adjList.put(s, null);
+    		List<String> temp = new ArrayList<String>();
+    		adjList.put(s, temp);
     	}
     	
+    	Collection<String> cellSetNames = adjList.keySet(); 
+		System.out.println("Names of the Cells input into the buildAdjList method:");
+		for (String s : cellSetNames)
+    	{
+        	System.out.print("     " + s);
+    	}
+		System.out.println("");
     	/*Second, iterate through every Cell in the cellMap. For each Cell in the cellSet, take note of the
     	 *Cell's name, then go to every key value in the adjList that matches the dependent Cell's name
     	 *and add the destination Cell's name to the list of dependencies. 
-    	 */
+    	 */	
     	Collection<Cell> cellSet = cellMap.values();
-    	for (Cell c : cellSet)
+		for (Cell c : cellSet)
     	{
+			c.inDegree = 0;
     		for (String s : c.dependencies)
-    		{
-    			adjList.get(s).add(c.id);
+    		{    			
+				List<String> temp = adjList.get(s);
+				if (temp == null)
+				{
+					temp = new ArrayList<String>();
+				}
+				temp.add(c.id);
+				adjList.put(s, temp);	
     			//calculates the inDegree of the dependent Cell
     			cellMap.get(c.id).inDegree++;
     		}   		
+    	}
+		
+		//
+    	for (String s : cellSetNames)
+    	{
+    		if (cellMap.get(s) == null)
+    		{
+            	Cell tempCell = new Cell(s, "0");
+            	cellMap.put(s, tempCell);
+    		}
     	}
     }
     
@@ -219,6 +241,44 @@ public class SpreadSheet extends Observable{
     	{
     		activeCells.add(c);
     	}
+    }
+    
+    public void printActiveCells()
+    {
+    	//TODO code to print out the List of active Cells
+    }
+    
+    public void printCellMap()
+    {
+    	Collection<String> cellSetNames = cellMap.keySet(); 
+		System.out.println("Contents of the cellMap which maps a Cell's name to the Cell Object: ");
+    	for (String s : cellSetNames)
+    	{
+    		System.out.println("     Name: " + s + "     Value: " + cellMap.get(s).last_value + 
+    							"     Formula: " + cellMap.get(s).formula);
+    	}
+    }
+    
+    public void printCellValues()
+    {
+    	//TODO
+    }
+    
+    public void printAdjList()
+    {
+    	Collection<String> cellSetNames = adjList.keySet(); 
+		System.out.println("Contents of the adjList which maps a Cell's name to the list of Cells" +
+							" it must be performed before: ");
+    	for (String s : cellSetNames)
+    	{
+    		System.out.println("     Name: " + s + "     inDegree: "  + cellMap.get(s).inDegree +
+    							"     Adjacent Cells: " + adjList.get(s));
+    	}
+    }
+    
+    public void printcellEvalQueue()
+    {
+    	//TODO
     }
 }
 
