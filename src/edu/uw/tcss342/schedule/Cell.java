@@ -50,9 +50,9 @@ public class Cell {
                 if(t instanceof BinaryOperatorToken) {
                     BinaryOperatorToken bot = (BinaryOperatorToken) t;
                     if(values.empty()) throw new IllegalStateException("Invalid Formula");
-                    Double left = values.pop();
-                    if(values.empty()) throw new IllegalStateException("Invalid Formula");
                     Double right = values.pop();
+                    if(values.empty()) throw new IllegalStateException("Invalid Formula");
+                    Double left = values.pop();
                     values.push(bot.operation.run(left,right));
                 }
             }                                                                                                           //TODO: Function Tokens
@@ -160,7 +160,6 @@ public class Cell {
                             ( operations[i].is_left_associative && operations[i].precedence <= (((BinaryOperatorToken) workspace_stack.peek()).precedence )
                             || operations[i].precedence < (((BinaryOperatorToken) workspace_stack.peek()).precedence) )){ //and token is either left associative and of <= precedence
                                                                                                                         //or is of lower precedence
-                        System.out.print("*");
                         output_queue.add(workspace_stack.pop());                                                        //shift token into output
 
                     }
