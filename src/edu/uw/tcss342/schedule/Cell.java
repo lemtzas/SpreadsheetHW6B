@@ -58,7 +58,8 @@ public class Cell {
             }                                                                                                           //TODO: Function Tokens
         }
         if(values.empty()) throw new IllegalStateException("Invalid Formula");
-        return values.pop();
+        last_value = values.pop();
+        return last_value;
     }
 
     public Double lastValue() {
