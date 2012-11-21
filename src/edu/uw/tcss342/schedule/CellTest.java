@@ -50,12 +50,14 @@ public class CellTest {
     @Test
     public void evaluateTest() {
         Map<String,Double> deps = new HashMap<String,Double>();
+        deps.put("A3",3.0);
+        deps.put("ZZTOP1337",5.0);
+        deps.put("ONE1",1.0);
+        deps.put("DEUS2",2.0);
         assertEquals("Evaluate: Single Digit Integer"                           ,(Double)1.0,   (Double)new Cell("A1","1").evaluate(deps));
         assertEquals("Evaluate: Double Digit Integer"                           ,(Double)15.0,  (Double)new Cell("A1","15").evaluate(deps));
-        deps.put("A3",3.0);
         assertEquals("Evaluate: Simple Cell ID"                                 ,(Double)3.0,   (Double)new Cell("A1","A3").evaluate(deps));
-        deps.put("ZZTOP1337",3.0);
-        assertEquals("Evaluate: Complex Cell ID"                                ,(Double)3.0,   (Double)new Cell("A1","ZZTOP1337").evaluate(deps));
+        assertEquals("Evaluate: Complex Cell ID"                                ,(Double)5.0,   (Double)new Cell("A1","ZZTOP1337").evaluate(deps));
         assertEquals("Evaluate: Simple Formula, Single Digits, No References, +",(Double)8.0,   (Double)new Cell("A1","6+2").evaluate(deps));
         assertEquals("Evaluate: Simple Formula, Single Digits, No References, -",(Double)4.0,   (Double)new Cell("A1","6-2").evaluate(deps));
         assertEquals("Evaluate: Simple Formula, Single Digits, No References, *",(Double)12.0,  (Double)new Cell("A1","6*2").evaluate(deps));
@@ -67,12 +69,15 @@ public class CellTest {
         assertEquals("Evaluate: Simple Formula, Double Digits, No References, *",(Double)32.0,  (Double)new Cell("A1","16*2").evaluate(deps));
         assertEquals("Evaluate: Simple Formula, Double Digits, No References, /",(Double)8.0,   (Double)new Cell("A1","16/2").evaluate(deps));
         assertEquals("Evaluate: Simple Formula, Double Digits, No References, ^",(Double)256.0, (Double)new Cell("A1","16^2").evaluate(deps));
-        new Cell("A1","6+2");
-        new Cell("A1","6+");
-        new Cell("A1","A1+2");
-        new Cell("A1","A1^2^3");
-        new Cell("A1","1+2*3");
-        new Cell("A1","3 + 4 * 2 / ( 1 - 5 ) ^ 2 ^ 3");
+
+        assertEquals("Evaluate: Simple Formula, Double Digits, References, +",  (Double)5.0,  (Double)new Cell("A1","A3+2").evaluate(deps));
+        assertEquals("Evaluate: Simple Formula, Double Digits, References, -",  (Double)1.0,  (Double)new Cell("A1","A3-2").evaluate(deps));
+        assertEquals("Evaluate: Simple Formula, Double Digits, References, *",  (Double)6.0,  (Double)new Cell("A1","A3*2").evaluate(deps));
+        assertEquals("Evaluate: Simple Formula, Double Digits, References, /",  (Double)1.5,   (Double)new Cell("A1","A3/2").evaluate(deps));
+        assertEquals("Evaluate: Simple Formula, Double Digits, References, ^",  (Double)9.0, (Double)new Cell("A1","A3^2").evaluate(deps));
+
+        assertEquals("Evaluate: Complex Formula, No References"              ,  (Double)3.0001220703125,  (Double)new Cell("A1","3 + 4 * 2 / ( 1 - 5 ) ^ 2 ^ 3").evaluate(deps));
+        assertEquals("Evaluate: Complex Formula, References"                 ,  (Double)3.0001220703125,  (Double)new Cell("A1","A3 + 4 * DEUS2 / ( ONE1 - ZZTOP1337 ) ^ DEUS2 ^ A3").evaluate(deps));
     }
 }
 
