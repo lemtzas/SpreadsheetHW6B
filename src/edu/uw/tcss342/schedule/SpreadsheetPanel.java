@@ -78,7 +78,7 @@ public class SpreadsheetPanel extends JPanel {
     /**
      * The spreadsheet.
      */
-    private Spreadsheet mySpreadsheet;
+    private SpreadSheet mySpreadsheet;
 
     /**
      * Construct a spreadsheet board from the input.
@@ -86,7 +86,7 @@ public class SpreadsheetPanel extends JPanel {
      * @param the_spreadsheet
      *            The spreadsheet.
      */
-    public SpreadsheetPanel(final Spreadsheet the_spreadsheet) {
+    public SpreadsheetPanel(final SpreadSheet the_spreadsheet) {
             super(new GridLayout(the_spreadsheet.getNumRows() + 1, the_spreadsheet
                             .getNumColumns() + 1));
             mySpreadsheet = the_spreadsheet;
@@ -149,7 +149,7 @@ public class SpreadsheetPanel extends JPanel {
      * Resets the entire spreadsheet. Clears any data stored in cells.
      */
     public void reset() {
-            mySpreadsheet = new Spreadsheet(myRows, myColumns);
+            mySpreadsheet = new SpreadSheet(myRows, myColumns);
     }
     
     @Override

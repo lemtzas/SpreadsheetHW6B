@@ -1,6 +1,7 @@
 package edu.uw.tcss342.schedule;
 
 import org.junit.*;
+
 import static org.junit.Assert.*;
 
 /**
@@ -29,3 +30,5 @@ public class CellTest {
         assertEquals("Origin failure",(new Cell.CellToken("ZZ5")).toString(),"ZZ5 (702,5)");
     }
 }
+
+

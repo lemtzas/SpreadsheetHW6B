@@ -44,7 +44,7 @@ public class SpreadsheetFrame extends JFrame {
          * @param the_args : command line.
          */
         public static void main(final String... the_args) {
-                final SpreadsheetFrame gui = new SpreadsheetFrame(new Spreadsheet(
+                final SpreadsheetFrame gui = new SpreadsheetFrame(new SpreadSheet(
                                 ROWS, COLUMNS));
                 gui.setUp();
         }
@@ -60,7 +60,7 @@ public class SpreadsheetFrame extends JFrame {
          * @param the_spreadsheet
          *            The spreadsheet.
          */
-        public SpreadsheetFrame(final Spreadsheet the_spreadsheet) {
+        public SpreadsheetFrame(final SpreadSheet the_spreadsheet) {
                 super(NAME);
                 panel = new SpreadsheetPanel(the_spreadsheet);
                 setDefaultCloseOperation(EXIT_ON_CLOSE);
