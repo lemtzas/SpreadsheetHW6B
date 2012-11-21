@@ -29,6 +29,18 @@ public class CellTest {
         assertEquals("Origin failure",(new Cell.CellToken("AA5")).toString(),"AA5 (27,5)");
         assertEquals("Origin failure",(new Cell.CellToken("ZZ5")).toString(),"ZZ5 (702,5)");
     }
+
+    @Test
+    public void parseTest() {
+        new Cell("A1","1");
+        new Cell("A1","15");
+        new Cell("A1","A3");
+        new Cell("A1","B7");
+        new Cell("A1","6+2");
+        new Cell("A1","6+");
+        new Cell("A1","+");
+        new Cell("A1","A1+2");
+    }
 }
 
 

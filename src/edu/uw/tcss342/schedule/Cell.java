@@ -1,9 +1,12 @@
 package edu.uw.tcss342.schedule;
 
 
+import com.sun.javaws.exceptions.InvalidArgumentException;
+
 import java.awt.*;
 import java.util.*;
 import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 /**
  * Cell representation in HW6B Spreadsheet. Immutable.
@@ -23,18 +26,7 @@ public class Cell {
     String formula;
     String id;
     double last_value;
-    int column;
-    int row;
     Set<String> dependencies;
-
-    public Cell(final Point column_row, final String formula) {
-        this.column = column_row.x;
-        this.row = column_row.y;
-        this.id = "colrow"; //TODO: Interpret this based on columnn_row
-        this.formula = formula.trim();
-        dependencies = new HashSet<String>();
-        parse();
-    }
 
     public Cell(final String id, final String formula) {
         this.id = id;
@@ -101,14 +93,36 @@ public class Cell {
      */
     private String parseToken(String remainder,Queue<Token> output_queue,Stack<Token> workspace_stack) {
         Pattern cell = Pattern.compile("^[A-Z]+[0-9]+");
-        Pattern token;
-        Pattern literal = Pattern.compile("^[-]?[0-9]+");
+        Pattern literal = Pattern.compile("^[0-9]+");
+
+        Matcher cell_matcher = cell.matcher(remainder);
+        Matcher literal_matcher = literal.matcher(remainder);
+        String match = "";
+        if( cell_matcher.find() ) { //found cell id
+            //TODO: Add cell
+            match = remainder.substring(cell_matcher.start(),cell_matcher.end());
+            output_queue.add(new CellToken(match));
+        } else if( literal_matcher.find() ) { //found literal
+            match = remainder.substring(literal_matcher.start(),literal_matcher.end());
+            output_queue.add(new LiteralToken(Double.parseDouble(match)));
+            //TODO: Add literal
+        } else {
+            //fallback: check for operation
+            for(int i = 0; i < operations.length; i++) {
+                if(remainder.startsWith(operations[i].token)) { //found operator
+                    match = operations[i].token;
+                    //TODO: Add operator
+                }
+            }
+        }
+        System.out.println("'" + remainder + "' | Matched: '" + match + "'");
+        if(match.length() == 0) throw new IllegalArgumentException("NOPE");
         //determine type of next token and add to appropriate stack
             //literal
             //cell
             //operator (unary,binary,association)
             //function
-        return null;
+        return remainder.substring(match.length());
     }
 
 
@@ -137,8 +151,24 @@ public class Cell {
 
 
     //token stuff
-    /** Map<Operator,Operation> **/
-    private Map<String,OperatorToken> operators = new HashMap<String,OperatorToken>();
+    /**The operations**/
+    BinaryOperatorToken operations[] = new BinaryOperatorToken[]{
+            new BinaryOperatorToken(0,"+",
+                    new BinaryOperatorRunnable() {
+                        @Override public double run(double left, double right) {return left + right;}}),
+            new BinaryOperatorToken(0,"-",
+                    new BinaryOperatorRunnable() {
+                        @Override public double run(double left, double right) {return left - right;}}),
+            new BinaryOperatorToken(0,"*",
+                    new BinaryOperatorRunnable() {
+                        @Override public double run(double left, double right) {return left * right;}}),
+            new BinaryOperatorToken(0,"/",
+                    new BinaryOperatorRunnable() {
+                        @Override public double run(double left, double right) {return left / right;}}),
+            new BinaryOperatorToken(0,"^",
+                    new BinaryOperatorRunnable() {
+                        @Override public double run(double left, double right) {return Math.pow(left, right);}})
+    };
 
 
     private static interface Token {}
@@ -149,15 +179,19 @@ public class Cell {
         double value;
     }
     private static interface OperatorToken extends Token {}
-    private static interface BinaryOperatorRunnable extends OperatorToken {
-        /** @return True if left associative, false if right associative. */
-        boolean leftAssociative();
+    private static interface BinaryOperatorRunnable {
         /** Performs the operation for this operator **/
         double run(double left, double right);
     }
-    private static interface UnaryOperatorRunnable extends OperatorToken {
-        /** Performs the operation for this operator **/
-        double run(double value);
+    private static class BinaryOperatorToken implements OperatorToken {
+        public final int precedence;
+        public final String token;
+        public final BinaryOperatorRunnable operation;
+        public BinaryOperatorToken(final int precedence, final String token, BinaryOperatorRunnable operation) {
+            this.precedence = precedence;
+            this.token = token;
+            this.operation = operation;
+        }
     }
 
     public static class CellToken implements Token {
