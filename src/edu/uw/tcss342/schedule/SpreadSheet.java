@@ -67,7 +67,7 @@ public class SpreadSheet extends Observable{
         	cellMap.put(the_name, tempCell);
     	}
     	buildAdjList();
-//    	topologicalSort();
+    	topologicalSort();
 //    	evaluateCells();
 //    	updateSpreadSheet();
     }
@@ -165,7 +165,7 @@ public class SpreadSheet extends Observable{
     
     /*
      * Performs the topological sort on the List<Cell> in the spreadsheet
-     * (Taken from Weiss p.559)
+     * (Adapted from code printed in  Weiss p.559)
      */
     private void topologicalSort()
     {
@@ -191,10 +191,20 @@ public class SpreadSheet extends Observable{
     	cellEvalQueue = new LinkedList<Cell>();
     	Collection<Cell> cellSet = cellMap.values();
     	for (Cell c : cellSet)
+    	{
     		if (c.inDegree == 0)
     		{
     			cellQueue.add(c);
     		}
+    	}
+    	
+    	//TODO remove after testing.
+//    	System.out.print("The Cells in Queue with inDegree = 0: [");
+//    	for (Cell d : cellQueue)
+//    	{
+//        	System.out.print(" " + d.id);
+//    	}
+//    	System.out.println(" ]");
     	
     	//Add the Cells to the Queue in the order they are to be executed.
     	int iterations;
@@ -202,6 +212,23 @@ public class SpreadSheet extends Observable{
     	{
     		Cell currentCell = cellQueue.remove();
     		cellEvalQueue.add(currentCell);
+    		
+        	//TODO remove after testing.
+//        	System.out.print("The Cells in cellEvalQueue: [");
+//        	for (Cell d : cellEvalQueue)
+//        	{
+//            	System.out.print(" " + d.id);
+//        	}
+//        	System.out.println(" ]");
+        	
+        	//TODO remove after testing.
+//        	System.out.print("The Cells in Queue with inDegree = 0: [");
+//        	for (Cell d : cellQueue)
+//        	{
+//            	System.out.print(" " + d.id);
+//        	}
+//        	System.out.println(" ]");
+        	
     		//for each adjacent Cell in the current Cell's list of adjacent Cells, evaluate the inDegree
     		for ( String adjCell : adjList.get(currentCell.id))
     		{
@@ -213,9 +240,10 @@ public class SpreadSheet extends Observable{
 	    			cellQueue.add(cellMap.get(adjCell));	
     			}
     		}
-    		if (iterations != cellMap.size())
-    			throw new SpreadSheetException("Spreadsheet has a cycle");
     	}
+    	//Throws Exception if there is a cycle detected in the SpreadSheet
+   		if (iterations != cellMap.size())
+			throw new SpreadSheetException("Spreadsheet has a cycle");
     }
     
     /*
@@ -243,11 +271,18 @@ public class SpreadSheet extends Observable{
     	}
     }
     
+    /*
+     * Used only for test purposes
+     */
     public void printActiveCells()
     {
     	//TODO code to print out the List of active Cells
     }
     
+    /*
+     * Used only for test purposes.  Prints to the console a representation of the Cells present
+     * in the SpreadSheet by name, value, and formula.
+     */
     public void printCellMap()
     {
     	Collection<String> cellSetNames = cellMap.keySet(); 
@@ -259,11 +294,19 @@ public class SpreadSheet extends Observable{
     	}
     }
     
+    /*
+     * Used only for test purposes
+     */
     public void printCellValues()
     {
     	//TODO
     }
     
+    /*
+     * Used only for test purposes.  Prints to the console a representation of the adjacency list
+     * which is the list of Cells in the SpreadSheet and the adjacent Cells who's values they are dependent
+     * on for purposes of evaluation.  Also prints the inDegree associated with each Cell.
+     */
     public void printAdjList()
     {
     	Collection<String> cellSetNames = adjList.keySet(); 
@@ -276,9 +319,18 @@ public class SpreadSheet extends Observable{
     	}
     }
     
+    /*
+     * Used only for test purposes.  Prints to the console the list of Cells (by name) that 
+     * are in topological order to be evaluated.
+     */
     public void printcellEvalQueue()
     {
-    	//TODO
+    	System.out.print("The Cells in cellEvalQueue: [");
+    	for (Cell d : cellEvalQueue)
+    	{
+        	System.out.print(" " + d.id);
+    	}
+    	System.out.println(" ]");
     }
 }
 
