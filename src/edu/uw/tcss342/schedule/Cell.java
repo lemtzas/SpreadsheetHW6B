@@ -38,7 +38,27 @@ public class Cell {
 
     public Double evaluate(Map<String,Double> dep_values) {
         //return result, given values for dependencies
-        return null;
+        Queue<Token> remaining_postfix = new LinkedList<Token>(token_queue);
+        Stack<Double> values = new Stack<Double>();
+        while(!remaining_postfix.isEmpty()) {
+            Token t = remaining_postfix.poll();
+            if(t instanceof LiteralToken) {
+                values.push(((LiteralToken) t).value);
+            } else if(t instanceof CellToken) {
+                values.push(((CellToken) t).value(dep_values));
+            } else if(t instanceof OperatorToken) {
+                if(t instanceof BinaryOperatorToken) {
+                    BinaryOperatorToken bot = (BinaryOperatorToken) t;
+                    if(values.empty()) throw new IllegalStateException("Invalid Formula");
+                    Double left = values.pop();
+                    if(values.empty()) throw new IllegalStateException("Invalid Formula");
+                    Double right = values.pop();
+                    values.push(bot.operation.run(left,right));
+                }
+            }
+        }
+        if(values.empty()) throw new IllegalStateException("Invalid Formula");
+        return values.pop();
     }
 
     public Double lastValue() {
@@ -219,7 +239,7 @@ public class Cell {
         public String toString() {
             return Double.toString(value);
         }
-        double value;
+        public final double value;
     }
     private static interface OperatorToken extends Token {}
     private static abstract class BinaryOperatorRunnable {
@@ -265,6 +285,10 @@ public class Cell {
                 temp_ident_remain = temp_ident_remain.substring(1);
             }
             row = Integer.parseInt(temp_ident_remain); //the match
+        }
+
+        public double value(Map<String,Double> values) {
+            return values.get(this.identifier);
         }
 
         public String toString() {
