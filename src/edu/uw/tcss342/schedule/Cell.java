@@ -27,6 +27,7 @@ public class Cell {
     String id;
     double last_value;
     Set<String> dependencies;
+    Queue<Token> token_queue;
 
     public Cell(final String id, final String formula) {
         this.id = id;
@@ -83,6 +84,17 @@ public class Cell {
         while(!remaining.isEmpty()) { //while we aren't done (while there are tokens to be read)
             remaining = parseToken(remaining,output_queue,workspace_stack);
         }
+        //finish up
+        while(!workspace_stack.empty())
+            output_queue.add(workspace_stack.pop());
+        token_queue = new LinkedList<Token>(output_queue);
+
+        //postfixify
+        StringBuilder sb = new StringBuilder();
+        while(!output_queue.isEmpty())
+            sb.append(" ").append(output_queue.poll().toString());
+
+        System.out.println(formula + " = " + sb);
     }
 
     /**
@@ -107,6 +119,10 @@ public class Cell {
             match = remainder.substring(literal_matcher.start(),literal_matcher.end());                                 //substring the value string
             output_queue.add(new LiteralToken(Double.parseDouble(match)));                                              //add values to output queue
 
+
+
+                                                                                                                        //TODO: Function Tokens
+                                                                                                                        //TODO: Comma support
         } else if(remainder.startsWith("(")) { //left paren
             match = "(";
             workspace_stack.push(new LeftParenToken());                                                                 //simply push onto the stack
@@ -115,18 +131,30 @@ public class Cell {
             match = ")";
             while(!workspace_stack.empty() && !(workspace_stack.peek() instanceof LeftParenToken))
                 output_queue.add(workspace_stack.pop());                                                                //transfer items to output until we find a left paren
-             workspace_stack.pop();                                                                                      //remove the left paren
+            if(workspace_stack.empty()) throw new IllegalStateException("Mismatched Parentheses");                      //TODO: Make custom exception
+            workspace_stack.pop();                                                                                      //remove the left paren
+            //TODO: Pop function token
+
         } else {
             //fallback: check for operation
             for(int i = 0; i < operations.length; i++) {
                 if(remainder.startsWith(operations[i].token)) { //found operator
-                    match = operations[i].token;
-                    //TODO: Add operator
+                    match = operations[i].token;                                                                        //set match
+                    while(!workspace_stack.empty() && (workspace_stack.peek() instanceof BinaryOperatorToken) &&        //while top item on stack is an operator
+                            ( operations[i].is_left_associative && operations[i].precedence <= (((BinaryOperatorToken) workspace_stack.peek()).precedence )
+                            || operations[i].precedence < (((BinaryOperatorToken) workspace_stack.peek()).precedence) )){ //and token is either left associative and of <= precedence
+                                                                                                                        //or is of lower precedence
+                        System.out.print("*");
+                        output_queue.add(workspace_stack.pop());                                                        //shift token into output
+
+                    }
+                    workspace_stack.push(operations[i]);                                                                //put new operator onto workspace
+                    break;                                                                                              //found token, we can leave
                 }
             }
         }
-        System.out.println("'" + remainder + "' | Matched: '" + match + "'");
-        if(match.length() == 0) throw new IllegalArgumentException("NOPE");
+        //System.out.println("'" + remainder + "' | Matched: '" + match + "'");
+        if(match.length() == 0) throw new IllegalStateException("Formula contains Invalid Token");                      //TODO: Make custom exception
         //determine type of next token and add to appropriate stack
             //literal
             //cell
@@ -163,20 +191,20 @@ public class Cell {
     //token stuff
     /**The operations**/
     BinaryOperatorToken operations[] = new BinaryOperatorToken[]{
-            new BinaryOperatorToken(0,"+",
-                    new BinaryOperatorRunnable(true) {
+            new BinaryOperatorToken(2,true,"+",
+                    new BinaryOperatorRunnable() {
                         @Override public double run(double left, double right) {return left + right;}}),
-            new BinaryOperatorToken(0,"-",
-                    new BinaryOperatorRunnable(true) {
+            new BinaryOperatorToken(2,true,"-",
+                    new BinaryOperatorRunnable() {
                         @Override public double run(double left, double right) {return left - right;}}),
-            new BinaryOperatorToken(0,"*",
-                    new BinaryOperatorRunnable(true) {
+            new BinaryOperatorToken(3,true,"*",
+                    new BinaryOperatorRunnable() {
                         @Override public double run(double left, double right) {return left * right;}}),
-            new BinaryOperatorToken(0,"/",
-                    new BinaryOperatorRunnable(true) {
+            new BinaryOperatorToken(3,true,"/",
+                    new BinaryOperatorRunnable() {
                         @Override public double run(double left, double right) {return left / right;}}),
-            new BinaryOperatorToken(0,"^",
-                    new BinaryOperatorRunnable(false) {
+            new BinaryOperatorToken(4,false,"^",
+                    new BinaryOperatorRunnable() {
                         @Override public double run(double left, double right) {return Math.pow(left, right);}})
     };
 
@@ -188,14 +216,13 @@ public class Cell {
         public LiteralToken(final double value) {
             this.value = value;
         }
+        public String toString() {
+            return Double.toString(value);
+        }
         double value;
     }
     private static interface OperatorToken extends Token {}
     private static abstract class BinaryOperatorRunnable {
-        private boolean is_left;
-        protected BinaryOperatorRunnable(boolean is_left) {this.is_left = is_left;}
-        /** Left Associative **/
-        boolean leftAssociative() {return is_left;}
         /** Performs the operation for this operator **/
         abstract public double run(double left, double right);
     }
@@ -203,10 +230,16 @@ public class Cell {
         public final int precedence;
         public final String token;
         public final BinaryOperatorRunnable operation;
-        public BinaryOperatorToken(final int precedence, final String token, BinaryOperatorRunnable operation) {
+        public final boolean is_left_associative;
+        public BinaryOperatorToken(final int precedence, final boolean is_left_assocaitive,
+                                    final String token, BinaryOperatorRunnable operation) {
             this.precedence = precedence;
+            this.is_left_associative = is_left_assocaitive;
             this.token = token;
             this.operation = operation;
+        }
+        public String toString() {
+            return token;
         }
     }
 
@@ -235,7 +268,7 @@ public class Cell {
         }
 
         public String toString() {
-            return identifier + " (" + column + "," + row + ")";
+            return identifier;// + " (" + column + "," + row + ")";
         }
     }
 }
