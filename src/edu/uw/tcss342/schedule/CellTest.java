@@ -40,6 +40,7 @@ public class CellTest {
         new Cell("A1","6+");
         new Cell("A1","+");
         new Cell("A1","A1+2");
+        new Cell("A1","(A1+2)+3");
     }
 }
 

@@ -99,13 +99,23 @@ public class Cell {
         Matcher literal_matcher = literal.matcher(remainder);
         String match = "";
         if( cell_matcher.find() ) { //found cell id
-            //TODO: Add cell
-            match = remainder.substring(cell_matcher.start(),cell_matcher.end());
-            output_queue.add(new CellToken(match));
+            match = remainder.substring(cell_matcher.start(),cell_matcher.end());                                       //substring cell name
+            dependencies.add(match);                                                                                    //add dependency
+            output_queue.add(new CellToken(match));                                                                     //it acts as a value, so add it to the output queue
+
         } else if( literal_matcher.find() ) { //found literal
-            match = remainder.substring(literal_matcher.start(),literal_matcher.end());
-            output_queue.add(new LiteralToken(Double.parseDouble(match)));
-            //TODO: Add literal
+            match = remainder.substring(literal_matcher.start(),literal_matcher.end());                                 //substring the value string
+            output_queue.add(new LiteralToken(Double.parseDouble(match)));                                              //add values to output queue
+
+        } else if(remainder.startsWith("(")) { //left paren
+            match = "(";
+            workspace_stack.push(new LeftParenToken());                                                                 //simply push onto the stack
+
+        } else if(remainder.startsWith(")")) { //right paren
+            match = ")";
+            while(!workspace_stack.empty() && !(workspace_stack.peek() instanceof LeftParenToken))
+                output_queue.add(workspace_stack.pop());                                                                //transfer items to output until we find a left paren
+             workspace_stack.pop();                                                                                      //remove the left paren
         } else {
             //fallback: check for operation
             for(int i = 0; i < operations.length; i++) {
@@ -154,24 +164,26 @@ public class Cell {
     /**The operations**/
     BinaryOperatorToken operations[] = new BinaryOperatorToken[]{
             new BinaryOperatorToken(0,"+",
-                    new BinaryOperatorRunnable() {
+                    new BinaryOperatorRunnable(true) {
                         @Override public double run(double left, double right) {return left + right;}}),
             new BinaryOperatorToken(0,"-",
-                    new BinaryOperatorRunnable() {
+                    new BinaryOperatorRunnable(true) {
                         @Override public double run(double left, double right) {return left - right;}}),
             new BinaryOperatorToken(0,"*",
-                    new BinaryOperatorRunnable() {
+                    new BinaryOperatorRunnable(true) {
                         @Override public double run(double left, double right) {return left * right;}}),
             new BinaryOperatorToken(0,"/",
-                    new BinaryOperatorRunnable() {
+                    new BinaryOperatorRunnable(true) {
                         @Override public double run(double left, double right) {return left / right;}}),
             new BinaryOperatorToken(0,"^",
-                    new BinaryOperatorRunnable() {
+                    new BinaryOperatorRunnable(false) {
                         @Override public double run(double left, double right) {return Math.pow(left, right);}})
     };
 
 
     private static interface Token {}
+    private static class LeftParenToken implements Token{}
+    private static class RightParenToken implements Token{}
     private static class LiteralToken implements Token {
         public LiteralToken(final double value) {
             this.value = value;
@@ -179,9 +191,13 @@ public class Cell {
         double value;
     }
     private static interface OperatorToken extends Token {}
-    private static interface BinaryOperatorRunnable {
+    private static abstract class BinaryOperatorRunnable {
+        private boolean is_left;
+        protected BinaryOperatorRunnable(boolean is_left) {this.is_left = is_left;}
+        /** Left Associative **/
+        boolean leftAssociative() {return is_left;}
         /** Performs the operation for this operator **/
-        double run(double left, double right);
+        abstract public double run(double left, double right);
     }
     private static class BinaryOperatorToken implements OperatorToken {
         public final int precedence;
