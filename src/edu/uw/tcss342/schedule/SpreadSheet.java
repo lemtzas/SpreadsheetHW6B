@@ -68,7 +68,7 @@ public class SpreadSheet extends Observable{
     	}
     	buildAdjList();
     	topologicalSort();
-//    	evaluateCells();
+    	evaluateCells();
 //    	updateSpreadSheet();
     }
     
@@ -198,37 +198,13 @@ public class SpreadSheet extends Observable{
     		}
     	}
     	
-    	//TODO remove after testing.
-//    	System.out.print("The Cells in Queue with inDegree = 0: [");
-//    	for (Cell d : cellQueue)
-//    	{
-//        	System.out.print(" " + d.id);
-//    	}
-//    	System.out.println(" ]");
-    	
     	//Add the Cells to the Queue in the order they are to be executed.
     	int iterations;
     	for (iterations = 0; !cellQueue.isEmpty(); iterations++)
     	{
     		Cell currentCell = cellQueue.remove();
     		cellEvalQueue.add(currentCell);
-    		
-        	//TODO remove after testing.
-//        	System.out.print("The Cells in cellEvalQueue: [");
-//        	for (Cell d : cellEvalQueue)
-//        	{
-//            	System.out.print(" " + d.id);
-//        	}
-//        	System.out.println(" ]");
-        	
-        	//TODO remove after testing.
-//        	System.out.print("The Cells in Queue with inDegree = 0: [");
-//        	for (Cell d : cellQueue)
-//        	{
-//            	System.out.print(" " + d.id);
-//        	}
-//        	System.out.println(" ]");
-        	
+    		       	
     		//for each adjacent Cell in the current Cell's list of adjacent Cells, evaluate the inDegree
     		for ( String adjCell : adjList.get(currentCell.id))
     		{
@@ -254,6 +230,7 @@ public class SpreadSheet extends Observable{
     {
     	//Assigns the first Cell's id and value into the cellValues Map.
     	Cell firstCell = cellEvalQueue.remove();
+    	firstCell.last_value = firstCell.evaluate(null);
     	cellValues.put(firstCell.id, firstCell.last_value);
     	
     	//Iterates down the cellEvalQueue in order 
@@ -263,7 +240,7 @@ public class SpreadSheet extends Observable{
     		currentCell.evaluate(cellValues);
     		cellValues.put(currentCell.id, currentCell.last_value);
     	}
-    	activeCells.clear();
+    	activeCells = new ArrayList<Cell>();
     	Collection<Cell> cellSet = cellMap.values();
     	for (Cell c : cellSet)
     	{
@@ -272,11 +249,19 @@ public class SpreadSheet extends Observable{
     }
     
     /*
-     * Used only for test purposes
+     * Used only for test purposes.  Prints to the console the list of Active Cells after 
+     * the GUI has called updateCell on a single Cell.  The SpreadSheet recalculates all 
+     * values for all active cells and stores it in the activeCells List for the GUI to retrieve.
      */
     public void printActiveCells()
     {
-    	//TODO code to print out the List of active Cells
+		System.out.println("Contents of the activeCell List that contains the final Cells and" +
+							" their calculated values: ");
+    	for (Cell c : activeCells)
+    	{
+    		System.out.println("     Name: " + c.id + "     Value: " + c.last_value + 
+    							"     Formula: " + c.formula);
+    	}
     }
     
     /*
@@ -295,11 +280,18 @@ public class SpreadSheet extends Observable{
     }
     
     /*
-     * Used only for test purposes
+     * Used only for test purposes.  Prints to the console the values associated with each cell
+     * after calculation.
      */
     public void printCellValues()
     {
-    	//TODO
+    	Collection<String> cellSetNames = cellMap.keySet(); 
+		System.out.println("Contents of the cellValue which maps a Cell's name to the value it's" +
+							" formula evaluates to in the SpreadSheet: ");
+    	for (String s : cellSetNames)
+    	{
+    		System.out.println("     Name: " + s + "     Value: " + cellValues.get(s));
+    	}
     }
     
     /*
@@ -347,13 +339,3 @@ class SpreadSheetException extends RuntimeException
 		super(name);
 	}
 }
-
-
-/*
- * Current Issues:
- * 		Need to sort out the constructor in Cell
- * 			-why do we need a Point object for the name?  I was WRONG!  It is much simpler to simply
- * 			 refer to it as a String, name
- * 			-my suggestion for a constructor
- * 				 public Cell(final String name, final String formula)
-*/

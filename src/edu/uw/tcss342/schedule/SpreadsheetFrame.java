@@ -44,8 +44,7 @@ public class SpreadsheetFrame extends JFrame {
          * @param the_args : command line.
          */
         public static void main(final String... the_args) {
-                final SpreadsheetFrame gui = new SpreadsheetFrame(new SpreadSheet(
-                                ROWS, COLUMNS));
+                final SpreadsheetFrame gui = new SpreadsheetFrame(new SpreadSheet());
                 gui.setUp();
         }
 
