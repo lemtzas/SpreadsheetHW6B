@@ -63,13 +63,27 @@ public class SpreadSheet extends Observable{
     	//replaced with a new Cell that is associated with the Cell's name and has the updated value.
     	else
     	{
-        	Cell tempCell = new Cell(the_name, the_formula);
-        	cellMap.put(the_name, tempCell);
+    		try
+    		{
+            	Cell tempCell = new Cell(the_name, the_formula);
+            	cellMap.put(the_name, tempCell);
+    		}
+    		catch( IllegalStateException e)
+    		{
+    			throw new IllegalStateException(e); 
+    		}
     	}
     	buildAdjList();
-    	topologicalSort();
-    	evaluateCells();
-//    	updateSpreadSheet();
+		try
+		{
+	    	topologicalSort();
+	    	evaluateCells();
+		}
+		catch( IllegalStateException e)
+		{
+			throw new IllegalStateException(e); 
+		}
+    	updateSpreadSheet();
     }
     
     /*
@@ -124,12 +138,6 @@ public class SpreadSheet extends Observable{
     	}
     	
     	Collection<String> cellSetNames = adjList.keySet(); 
-		System.out.println("Names of the Cells input into the buildAdjList method:");
-		for (String s : cellSetNames)
-    	{
-        	System.out.print("     " + s);
-    	}
-		System.out.println("");
     	/*Second, iterate through every Cell in the cellMap. For each Cell in the cellSet, take note of the
     	 *Cell's name, then go to every key value in the adjList that matches the dependent Cell's name
     	 *and add the destination Cell's name to the list of dependencies. 
@@ -183,7 +191,7 @@ public class SpreadSheet extends Observable{
     	//if there was no cell with an inDegree of 0, throw this exception.
     	if (startCell == null)
     	{
-    		throw new SpreadSheetException("Start Cell not found");
+    		throw new IllegalStateException("Start Cell not found");
     	}
     	
     	//Add Cells to the Queue in the order they should be calculated.
@@ -219,7 +227,7 @@ public class SpreadSheet extends Observable{
     	}
     	//Throws Exception if there is a cycle detected in the SpreadSheet
    		if (iterations != cellMap.size())
-			throw new SpreadSheetException("Spreadsheet has a cycle");
+   			throw new IllegalStateException("Spreadsheet has a cycle");
     }
     
     /*
@@ -324,18 +332,4 @@ public class SpreadSheet extends Observable{
     	}
     	System.out.println(" ]");
     }
-}
-
-/*
- * Used to signal violations of preconditions in the SpreadSheet algorithms
- * 
- * @param name The name of the exception
- */
-@SuppressWarnings("serial")
-class SpreadSheetException extends RuntimeException
-{
-	public SpreadSheetException(String name)
-	{
-		super(name);
-	}
 }
