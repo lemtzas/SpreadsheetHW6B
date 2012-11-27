@@ -21,6 +21,8 @@ import java.util.Set;
  * Time: 9:34
  */
 public class SpreadSheet extends Observable{
+	//the List of Cells that are currently active in the spreadsheet.  All Cells not 
+	//included in this List have the value 0.
     private List<Cell> activeCells;
     
     //Maps the Cell's name to the Cell Object
@@ -32,6 +34,7 @@ public class SpreadSheet extends Observable{
     //The adjacency list used in topological sort
     private HashMap<String, List<String>> adjList;
     
+    //The Queue that holds the Cells in the order they should be evaluated in.
 	private Queue<Cell> cellEvalQueue;
 
     
@@ -107,11 +110,20 @@ public class SpreadSheet extends Observable{
 		return returnCells;	
     }
     
+    /*
+     * Returns a Map of all the Cells input into the SpreadSheet with their name as the key.
+     * Only used for testing purposes.
+     * 
+     * @return cellMap The Map that associates a Cell's name with the Cell itself.
+     */
     public Map<String, Cell> getCellMap()
     {
     	return cellMap;
     }
 
+    /*
+     * Allows the GUI to reset the SpreadSheet to default value of 0 for all Cells.
+     */
 	public void reset()
     {
     	activeCells.clear();

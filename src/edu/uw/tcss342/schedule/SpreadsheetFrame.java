@@ -1,5 +1,4 @@
 package edu.uw.tcss342.schedule;
-
 import java.awt.event.ActionEvent;
 import java.io.File;
 
@@ -44,7 +43,7 @@ public class SpreadsheetFrame extends JFrame {
          * @param the_args : command line.
          */
         public static void main(final String... the_args) {
-                final SpreadsheetFrame gui = new SpreadsheetFrame(new SpreadSheet());
+                final SpreadsheetFrame gui = new SpreadsheetFrame(new SpreadSheet( ));
                 gui.setUp();
         }
 

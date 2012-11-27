@@ -1,10 +1,5 @@
-package edu.uw.tcss342.schedule;
-
 import javax.swing.JTextField;
 
-
-//This is assuming we're going off his CellToken Class 
-//that he gives in the description
 
 //import CellToken;
 
@@ -20,13 +15,13 @@ public class CellsGUI extends JTextField {
 	/**
 	 * Cell token object.
 	 */
-	private CellToken cell_token;
+	private Cell.CellToken cell_token;
 	
 	/**
 	 * CellsGui Constructor with cell token
 	 * @param cell_token Given Cell token.
 	 */
-	public CellsGUI(final CellToken the_cell_token)
+	public CellsGUI(final Cell.CellToken the_cell_token)
 	{
 		cell_token = the_cell_token;
 	}
@@ -36,14 +31,14 @@ public class CellsGUI extends JTextField {
 	 */
 	public CellsGUI()
 	{
-		cell_token = new CellToken(0, 0);
+		cell_token = new Cell.CellToken(null);
 	}
 	
 	/**
 	 * Cell token setter.
 	 * @param the_cell_token
 	 */
-	public void setToken(final CellToken the_cell_token)
+	public void setToken(final Cell.CellToken the_cell_token)
 	{
 		cell_token = the_cell_token;
 	}
@@ -52,7 +47,7 @@ public class CellsGUI extends JTextField {
 	 * Cell token getter.
 	 * @return Cell token associated with this CellsGUI.
 	 */
-	public CellToken getToken()
+	public Cell.CellToken getToken()
 	{
 		return cell_token;
 	}

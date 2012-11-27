@@ -1,5 +1,4 @@
 package edu.uw.tcss342.schedule;
-
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.GridLayout;
@@ -11,8 +10,10 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+
 import java.io.FileReader;
 import java.io.FileWriter;
+
 import java.util.StringTokenizer;
 
 import javax.swing.JLabel;
@@ -20,10 +21,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
-
-//import Spreadsheet;
-
-//import CellToken;
 
 /**
  * Panel class for the spreadsheet.
@@ -33,11 +30,7 @@ import javax.swing.SwingConstants;
  */
 @SuppressWarnings("serial")
 public class SpreadsheetPanel extends JPanel {
-	
-	
-	
-	
-	
+
 	
 	 /**
      * The default height of a cell.
@@ -48,6 +41,16 @@ public class SpreadsheetPanel extends JPanel {
      * The default width of a cell.
      */
     public static final int INIT_CELL_WIDTH = 80;
+    
+    /**
+     * Default number of columns in the spreadsheet.
+     */
+    public static final int COLUMNS = 12;
+
+    /**
+     * Default number of rows in the spreadsheet.
+     */
+    public static final int ROWS = 10;
 
     /**
      * The cell array of this spreadsheet.
@@ -79,6 +82,11 @@ public class SpreadsheetPanel extends JPanel {
      * The spreadsheet.
      */
     private SpreadSheet mySpreadsheet;
+    
+    /**
+     * A cell in the spreadsheet.
+     */
+    private Cell myCell;
 
     /**
      * Construct a spreadsheet board from the input.
@@ -87,53 +95,49 @@ public class SpreadsheetPanel extends JPanel {
      *            The spreadsheet.
      */
     public SpreadsheetPanel(final SpreadSheet the_spreadsheet) {
-            super(new GridLayout(the_spreadsheet.getNumRows() + 1, the_spreadsheet
-                            .getNumColumns() + 1));
+            super(new GridLayout(ROWS +1 , COLUMNS + 1));
             mySpreadsheet = the_spreadsheet;
             
-            myRows = the_spreadsheet.getNumRows();
-            myColumns = the_spreadsheet.getNumColumns();
+            myRows = ROWS;
+            myColumns = COLUMNS;
             cellHeight = INIT_CELL_HEIGHT;
             cellWidth = INIT_CELL_WIDTH;
             
             setPreferredSize(new Dimension(myColumns * cellWidth, myRows * cellHeight));
             cellArray = new CellsGUI[myRows][myColumns];
-            initialize();
+            //initialize();
     }
 
     
     /**
      * Initializes the array of cells and places them in the panel.
-     */
+     
     private void initialize() {
             for (int i = -1; i < myRows; i++)
                     for (int j = -1; j < myColumns; j++) {
-                            CellToken cellToken = new CellToken(i, j);
+                        Cell.CellToken cellToken = new Cell.CellToken(myCell.id);   
 
                             if (i == -1) {
                                     if (j == -1)
                                             add(new JLabel("", null, SwingConstants.CENTER));
                                     else
-                                            add(new JLabel(cellToken.columnToString(), null,
-                                                            SwingConstants.CENTER));
+                                            add(new JLabel(cellToken.toString(), null,SwingConstants.CENTER));
                             } else if (j == -1)
-                                    add(new JLabel(Integer.toString(i), null,
-                                                    SwingConstants.CENTER));
+                                    add(new JLabel(Integer.toString(i), null,SwingConstants.CENTER));
                             else {
                                     cellArray[i][j] = new CellsGUI(cellToken);
-                                    // my_cell_array[i][j].setText(my_spreadsheet.cellValueToString(my_cell_array[i][j].getCellToken()));
+                                   
                                     setCellText(cellArray[i][j]);
-                                    cellArray[i][j]
-                                                    .addMouseListener(new MouseCellListener());
+                                    cellArray[i][j].addMouseListener(new MouseCellListener());
                                     cellArray[i][j].addKeyListener(new KeyCellListener());
-                                    cellArray[i][j]
-                                                    .addFocusListener(new FocusCellListener());
-                                    // my_cell_array[i][j].setPreferredSize(new
-                                    // Dimension(DEFAULT_CELL_WIDTH, DEFAULT_CELL_HEIGHT));
+                                    cellArray[i][j].addFocusListener(new FocusCellListener());
+
                                     add(cellArray[i][j]);
                             }
                     }
     }
+    
+    */
     
     /**
      * Updates each cells values.
@@ -149,7 +153,8 @@ public class SpreadsheetPanel extends JPanel {
      * Resets the entire spreadsheet. Clears any data stored in cells.
      */
     public void reset() {
-            mySpreadsheet = new SpreadSheet(myRows, myColumns);
+            
+    	mySpreadsheet.reset();
     }
     
     @Override
@@ -190,12 +195,17 @@ public class SpreadsheetPanel extends JPanel {
      * @param the_cell
      */
     private void setCellText(final CellsGUI the_cell) {
-            if (mySpreadsheet.cellFormulaToString(the_cell.getToken())
-                            .isEmpty())
+    	
+    	double cellValue = myCell.last_value;
+    	String textValue = String.valueOf(cellValue);
+    	
+    	
+            if (myCell.formula == null)
                     the_cell.setText("");
             else
-                    the_cell.setText(mySpreadsheet.cellValueToString(the_cell
-                                    .getToken()));
+                    the_cell.setText(textValue);
+                    		
+                    	
     }
 
     
@@ -243,8 +253,7 @@ public class SpreadsheetPanel extends JPanel {
                       if (output.equals(empty)) {
                         tokenNumber++;
                       } else {
-                        mySpreadsheet.changeCellFormulaAndRecalculate(
-                            cellArray[lineNumber][tokenNumber].getToken(), output);
+                        mySpreadsheet.updateCell(getName(), output);
                         tokenNumber++;
                       }                             
                     }
@@ -256,18 +265,21 @@ public class SpreadsheetPanel extends JPanel {
 
     /**
      * Save to a file.
-     * @param canonicalPath The path.
+     * @param path : path to the file.
      */
     public void save(String path) throws Exception {
             BufferedWriter input = new BufferedWriter(new FileWriter(path));
             String output = new String();
             for(CellsGUI[] cells : cellArray) {
                     for(CellsGUI cell : cells) {
-                      if (mySpreadsheet.cellFormulaToString(cell.getToken()).isEmpty()) {
+                      if (myCell.formula == null)
+                      {
+                    		  //mySpreadsheet.cellFormulaToString(cell.getToken()).isEmpty()) {
                         output = " ";
                       }
                       else {
-                        output = mySpreadsheet.cellFormulaToString(cell.getToken());
+                        output = myCell.getFormula(); 
+                        		//mySpreadsheet.cellFormulaToString(cell.getToken());
                       }
                             input.write(output);
                             input.append(',');
@@ -291,8 +303,8 @@ public class SpreadsheetPanel extends JPanel {
             public void mouseClicked(MouseEvent the_event) {
                     if (the_event.getClickCount() == 2) {
                             final CellsGUI cellGui = (CellsGUI) the_event.getComponent();
-                            cellGui.setText(mySpreadsheet.cellFormulaToString(cellGui
-                                            .getToken()));
+                            cellGui.setText(myCell.toString());
+                            		//mySpreadsheet.cellFormulaToString(cellGui.getToken()));
                             cellGui.setCaretPosition(cellGui.getDocument().getLength());
                     }
             }
@@ -329,10 +341,14 @@ public class SpreadsheetPanel extends JPanel {
                 public void keyPressed(KeyEvent the_event) {
                         if (the_event.getKeyCode() == KeyEvent.VK_ENTER) {
                                 final CellsGUI cellGui = (CellsGUI) the_event.getComponent();
-                                try {
-                                        mySpreadsheet.changeCellFormulaAndRecalculate(cellGui
-                                                        .getToken(), cellGui.getText());
-                                }
+                                //try {
+                                        mySpreadsheet.updateSpreadSheet();
+                               // }
+                                
+                                //TODO: Stub for now.
+                              //  catch (EOFException e) {
+                                	
+                              //  }
                                 /*
                                 catch (CycleWarning e) {
                                         JOptionPane.showMessageDialog(null,
@@ -363,18 +379,10 @@ public class SpreadsheetPanel extends JPanel {
                         }
                 }
         }
+}
         
-        @SuppressWarnings("serial")
-        private class  ParenthesesWarning extends Exception
-        {
-        }
-        
-        @SuppressWarnings("serial")
-        private class CycleWarning extends Exception
-        {
-        }
+       
 
       
 
        
-}
