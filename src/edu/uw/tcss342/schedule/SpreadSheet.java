@@ -1,14 +1,14 @@
 package edu.uw.tcss342.schedule;
 
+
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Observable;
 import java.util.Queue;
-import java.util.Set;
 
 /**
  * HW6B Spreadsheet.
@@ -20,7 +20,7 @@ import java.util.Set;
  * Date: 11/18/12
  * Time: 9:34
  */
-public class SpreadSheet extends Observable{
+public class SpreadSheet{
 	//the List of Cells that are currently active in the spreadsheet.  All Cells not 
 	//included in this List have the value 0.
     private List<Cell> activeCells = new ArrayList<Cell>();
@@ -86,16 +86,6 @@ public class SpreadSheet extends Observable{
 		{
 			throw new IllegalStateException(e); 
 		}
-    	updateSpreadSheet();
-    }
-    
-    /*
-     * Notify's all observers when a change has been made to the SpreadSheet
-     */
-    public void updateSpreadSheet()
-    {
-        setChanged();
-        notifyObservers();
     }
     
     /*
@@ -109,17 +99,6 @@ public class SpreadSheet extends Observable{
     	List<Cell> returnCells = new ArrayList<Cell>(activeCells);
 		return returnCells;	
     }
-    
-    /*
-     * Returns a Map of all the Cells input into the SpreadSheet with their name as the key.
-     * Only used for testing purposes.
-     * 
-     * @return cellMap The Map that associates a Cell's name with the Cell itself.
-     */
-    public Map<String, Cell> getCellMap()
-    {
-    	return cellMap;
-    }
 
     /*
      * Allows the GUI to reset the SpreadSheet to default value of 0 for all Cells.
@@ -131,7 +110,17 @@ public class SpreadSheet extends Observable{
     	cellValues.clear();
     	adjList.clear();
     	cellEvalQueue.clear();
-    	updateSpreadSheet();
+    }
+	
+	   /*
+     * Returns a Map of all the Cells input into the SpreadSheet with their name as the key.
+     * Only used for testing purposes.
+     * 
+     * @return cellMap The Map that associates a Cell's name with the Cell itself.
+     */
+    public Map<String, Cell> getCellMap()
+    {
+    	return cellMap;
     }
     
     /*
@@ -171,7 +160,7 @@ public class SpreadSheet extends Observable{
     			cellMap.get(c.id).inDegree++;
     		}   		
     	}
-		
+
 		//
     	for (String s : cellSetNames)
     	{
