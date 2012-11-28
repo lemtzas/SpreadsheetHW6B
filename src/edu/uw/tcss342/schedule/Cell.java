@@ -15,20 +15,28 @@ import java.util.regex.Matcher;
  * Client of Core.
  * Calculates cell dependencies and evaluates expressions.
  *
- * User: David
- * Date: 11/14/12
- * Time: 4:05 PM
- * To change this template use File | Settings | File Templates.
+ * @author David Sharer
  */
 public class Cell {
-    /** Topo Sort workspace variable **/
+    /** Topo Sort workspace variable. **/
     public int inDegree;
+    /** The cell's formula. **/
     String formula;
+    /** The cell's identifying string. **/
     String id;
+    /** The last calculated value for this cell. **/
     double last_value;
+    /** The cells that this cell depends on. **/
     Set<String> dependencies;
+    /** The post-fix processing queue. For internal use only. **/
     Queue<Token> token_queue;
 
+    /**
+     * Create a cell with the given ID and formula. Determines dependencies immediately.
+     *
+     * @param id The cell's identifying string
+     * @param formula The cell's formula. Any errors in this will result in an IllegalStateException.
+     */
     public Cell(final String id, final String formula) {
         this.id = id;
         this.last_value = 0;
@@ -37,6 +45,13 @@ public class Cell {
         parse();
     }
 
+    /**
+     * Evaluates a cell given a map of dependency cell ids to their values.
+     * The value is stored for quick lookup later.
+     *
+     * @param dep_values Map<ID String, Double Value>.
+     * @return the value of this cell.
+     */
     public Double evaluate(Map<String,Double> dep_values) {
         //return result, given values for dependencies
         Queue<Token> remaining_postfix = new LinkedList<Token>(token_queue);
@@ -63,7 +78,9 @@ public class Cell {
         return last_value;
     }
 
-
+    /**
+     * @return the last value calculated with evaluate()
+     */
     public Double lastValue() {
         return last_value;
     }
@@ -77,19 +94,31 @@ public class Cell {
         return new HashSet<String>();
     }
 
+    /**
+     * @return The raw formula stored in this cell.
+     */
     public String toString() {
         return getFormula();
     }
 
+    /**
+     * @return The raw formula in this cell.
+     */
     public String getFormula() {
         return formula;
     }
 
+    /**
+     * @return The identifier of this cell.
+     */
     public String getID() {
         return id;
     }
 
-
+    /**
+     * Internal function that interprets the formula for this cell.
+     * Determines dependencies and prepares a postfix expression for later parsing.
+     */
     private void parse() {
         dependencies.clear(); //empty result space
 
@@ -116,14 +145,15 @@ public class Cell {
     }
 
     /**
-     *
+     * Helper function for interpreting formula tokens.
      * @param remainder The index to look for the start of the token at
-     * @param output_queue the queue of tokens
-     * @return the new index
+     * @param output_queue the output queue of tokens
+     * @param workspace_stack a workspace stack for operator tokens
+     * @return the remaining characters in the formula string
      */
     private String parseToken(String remainder,Queue<Token> output_queue,Stack<Token> workspace_stack) {
         Pattern cell = Pattern.compile("^[A-Z]+[0-9]+");
-        Pattern literal = Pattern.compile("^[0-9]+");
+        Pattern literal = Pattern.compile("^[0-9]+(?:\\.[0-9]+)?");
 
         Matcher cell_matcher = cell.matcher(remainder);
         Matcher literal_matcher = literal.matcher(remainder);
@@ -205,10 +235,11 @@ public class Cell {
                         @Override public double run(double left, double right) {return Math.pow(left, right);}})
     };
 
-
+    /** Represents a token. **/
     private static interface Token {}
+    /** Represents a left Parentheses. **/
     private static class LeftParenToken implements Token{}
-    private static class RightParenToken implements Token{}
+    /** Represents a Literal Token (number). **/
     private static class LiteralToken implements Token {
         public LiteralToken(final double value) {
             this.value = value;
@@ -218,16 +249,32 @@ public class Cell {
         }
         public final double value;
     }
+    /** Represents an operator token. **/
     private static interface OperatorToken extends Token {}
+    /** Function wrapper for operator tokens. **/
     private static abstract class BinaryOperatorRunnable {
         /** Performs the operation for this operator **/
         abstract public double run(double left, double right);
     }
+
+    /** Represents a binary operator token. **/
     private static class BinaryOperatorToken implements OperatorToken {
+        /** The precedence of the operator. Higher is more important. **/
         public final int precedence;
+        /** The string representing this operator. **/
         public final String token;
+        /** The function to perform for this operator. **/
         public final BinaryOperatorRunnable operation;
+        /** Is this operator left associative? False means right-associative. **/
         public final boolean is_left_associative;
+
+        /**
+         * Constructs a token template with the appropriate values.
+         * @param precedence The precedence of the operator. Higher is more important.
+         * @param is_left_assocaitive Is this operator left associative? False means right-associative.
+         * @param token The string representing this operator.
+         * @param operation The function to perform for this operator.
+         */
         public BinaryOperatorToken(final int precedence, final boolean is_left_assocaitive,
                                     final String token, BinaryOperatorRunnable operation) {
             this.precedence = precedence;
@@ -240,11 +287,16 @@ public class Cell {
         }
     }
 
+    /** Represents a cell. **/
     public static class CellToken implements Token {
         int column;
         int row;
         String identifier;
 
+        /**
+         * Creates a cell token based on a given identifier.
+         * @param identifier The identifier of the cell
+         */
         public CellToken(final String identifier) {
             this.identifier = identifier.toUpperCase();
             String temp_ident_remain = this.identifier.toUpperCase();
@@ -262,27 +314,36 @@ public class Cell {
             row = Integer.parseInt(temp_ident_remain); //the match
 
             //fix up identifier
-            this.identifier = this.columnString() + Integer.toString(row);
+            //this.identifier = this.columnString() + Integer.toString(row);
         }
 
+        /**
+         * Creates a cell based on a column and row.
+         * @param col The column of the cell.
+         * @param row Tje row of the cell.
+         */
         public CellToken(int col, int row) {
             this.row = row;
             this.column = col;
             identifier = this.columnString() + Integer.toString(row);
         }
 
+        /** Gets the value of this cell from a map of cell-value pairs. **/
         public double value(Map<String,Double> values) {
             return values.get(this.identifier);
         }
 
+        /** Outputs the identifier of this cell. **/
         public String toString() {
             return identifier;// + " (" + column + "," + row + ")";
         }
 
+        /** Outputs the identifier and name of this cell in the format [A-Z]+[0-9]+ (<row>,<col>) **/
         public String fullString() {
             return identifier + " (" + column + "," + row + ")";
         }
 
+        /** A helper function that determines the base-26 (A-Z) representation of the column for this cell. **/
         public String columnString() {
             StringBuffer stringBuff = new StringBuffer();
             int digit = this.column % 26;
