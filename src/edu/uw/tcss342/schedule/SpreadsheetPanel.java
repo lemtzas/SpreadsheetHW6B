@@ -31,7 +31,7 @@ import javax.swing.SwingConstants;
 @SuppressWarnings("serial")
 public class SpreadsheetPanel extends JPanel {
 
-	
+
 	 /**
      * The default height of a cell.
      */
@@ -45,12 +45,12 @@ public class SpreadsheetPanel extends JPanel {
     /**
      * Default number of columns in the spreadsheet.
      */
-    public static final int COLUMNS = 12;
+    public static final int COLUMNS = 24;
 
     /**
      * Default number of rows in the spreadsheet.
      */
-    public static final int ROWS = 10;
+    public static final int ROWS = 20;
 
     /**
      * The cell array of this spreadsheet.
@@ -66,6 +66,7 @@ public class SpreadsheetPanel extends JPanel {
      * The cell's width.
      */
     private int cellWidth;
+    
 
 
     /**
@@ -87,6 +88,10 @@ public class SpreadsheetPanel extends JPanel {
      * A cell in the spreadsheet.
      */
     private Cell myCell = null;
+    
+    private String cellName;
+    
+    private String cellFormula;
 
     /**
      * Construct a spreadsheet board from the input.
@@ -106,6 +111,8 @@ public class SpreadsheetPanel extends JPanel {
             setPreferredSize(new Dimension(myColumns * cellWidth, myRows * cellHeight));
             cellArray = new CellsGUI[myRows][myColumns];
             initialize();
+            
+            
     }
 
     
@@ -303,13 +310,12 @@ public class SpreadsheetPanel extends JPanel {
             public void mouseClicked(MouseEvent the_event) {
                     if (the_event.getClickCount() == 2) {
                             final CellsGUI cellGui = (CellsGUI) the_event.getComponent();
-                            cellGui.setText(myCell.toString());
-                            		//mySpreadsheet.cellFormulaToString(cellGui.getToken()));
+                            cellGui.setText(cellGui.getToken().toString());
                             cellGui.setCaretPosition(cellGui.getDocument().getLength());
                     }
             }
     }
-	
+
         /**
          * The Focus listener for cells that shows it's numerical value
          * when the cell loses focus.
@@ -322,7 +328,6 @@ public class SpreadsheetPanel extends JPanel {
         	
                 public void focusLost(FocusEvent the_event) {
                         final CellsGUI cellGui = (CellsGUI) the_event.getComponent();
-                        // cellGui.setText(mySpreadsheet.cellValueToString(cellGui.getToken()));
                         setCellText(cellGui);
                 }
 
@@ -342,7 +347,7 @@ public class SpreadsheetPanel extends JPanel {
                         if (the_event.getKeyCode() == KeyEvent.VK_ENTER) {
                                 final CellsGUI cellGui = (CellsGUI) the_event.getComponent();
                                 //try {
-                                        mySpreadsheet.updateSpreadSheet();
+                                       mySpreadsheet.updateCell(cellGui.getToken().toString(), cellGui.getText());
                                // }
                                 
                                 //TODO: Stub for now.
@@ -380,9 +385,3 @@ public class SpreadsheetPanel extends JPanel {
                 }
         }
 }
-        
-       
-
-      
-
-       
