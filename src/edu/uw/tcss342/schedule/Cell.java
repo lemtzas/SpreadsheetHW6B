@@ -244,17 +244,15 @@ public class Cell {
         int column;
         int row;
         String identifier;
+
         public CellToken(final String identifier) {
             this.identifier = identifier.toUpperCase();
-            String temp_ident_remain = this.identifier;
+            String temp_ident_remain = this.identifier.toUpperCase();
             column = 0; //init column
             //calculate column
             while(temp_ident_remain.matches("^[A-Z].*")) { //starts with character
                 //gets value of char, 10-35
-                int value = Character.getNumericValue(temp_ident_remain.charAt(0));
-
-                //get value from letter
-                value = value - 10;
+                int value = Character.getNumericValue(temp_ident_remain.charAt(0)) - 10;
 
                 //add to value
                 column *= 26;
@@ -262,6 +260,9 @@ public class Cell {
                 temp_ident_remain = temp_ident_remain.substring(1);
             }
             row = Integer.parseInt(temp_ident_remain); //the match
+
+            //fix up identifier
+            this.identifier = this.columnString() + Integer.toString(row);
         }
 
         public CellToken(int col, int row) {
@@ -289,8 +290,8 @@ public class Cell {
             char letter = (char) (digit + 'A');
             stringBuff.append(letter);
             while (remain > 0) {
-                digit = (remain - 1) % 26;
-                remain = remain / 26;
+                digit = (remain) % 26;
+                remain = (remain-digit) / 26;
                 letter = (char) (digit + 'A');
                 stringBuff.insert(0, letter);
             }

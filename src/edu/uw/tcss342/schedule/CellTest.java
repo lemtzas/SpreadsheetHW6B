@@ -22,15 +22,16 @@ public class CellTest {
 
     @Test
     public void testTokenCell() {
-        assertEquals("Origin failure",(new Cell.CellToken("A1")).fullString(),"A1 (0,1)");
-        assertEquals("Origin failure",(new Cell.CellToken("A4")).fullString(),"A4 (0,4)");
-        assertEquals("Origin failure",(new Cell.CellToken("A67")).fullString(),"A67 (0,67)");
-        assertEquals("Origin failure",(new Cell.CellToken("A-67")).fullString(),"A-67 (0,-67)");
-        assertEquals("Origin failure",(new Cell.CellToken("C5")).fullString(),"C5 (2,5)");
-        assertEquals("Origin failure",(new Cell.CellToken("F5")).fullString(),"F5 (5,5)");
-        assertEquals("Origin failure",(new Cell.CellToken("Z5")).fullString(),"Z5 (25,5)");
-        assertEquals("Origin failure",(new Cell.CellToken("AA5")).fullString(),"AA5 (26,5)");
-        assertEquals("Origin failure",(new Cell.CellToken("ZZ5")).fullString(),"ZZ5 (701,5)");
+        assertEquals("Origin failure","A1 (0,1)",(new Cell.CellToken("A1")).fullString());
+        assertEquals("Origin failure","A4 (0,4)",(new Cell.CellToken("A4")).fullString());
+        assertEquals("Origin failure","A67 (0,67)",(new Cell.CellToken("A67")).fullString());
+        assertEquals("Origin failure","A-67 (0,-67)",(new Cell.CellToken("A-67")).fullString());
+        assertEquals("Origin failure","C5 (2,5)",(new Cell.CellToken("C5")).fullString());
+        assertEquals("Origin failure","F5 (5,5)",(new Cell.CellToken("F5")).fullString());
+        assertEquals("Origin failure","Z5 (25,5)",(new Cell.CellToken("Z5")).fullString());
+        assertEquals("Origin failure","BA5 (26,5)",(new Cell.CellToken("BA5")).fullString());
+        assertEquals("Origin failure","BAZ5 (701,5)",(new Cell.CellToken("BAZ5")).fullString());
+        assertEquals("Origin failure","A0 (0,0)",(new Cell.CellToken("AAAAAAAAAA000000000")).fullString());
     }
 
     @Test
@@ -92,8 +93,8 @@ public class CellTest {
         assertEquals("Origin failure1","A-67 (0,-67)",(new Cell.CellToken(0,-67)).fullString());
         assertEquals("Origin failure1","C5 (2,5)",(new Cell.CellToken(2,5)).fullString());
         assertEquals("Origin failure1","F5 (5,5)",(new Cell.CellToken(5,5)).fullString());
-        assertEquals("Origin failure1","AA5 (26,5)",(new Cell.CellToken(26,5)).fullString());
-        assertEquals("Origin failure1","ZZ5 (701,5)",(new Cell.CellToken(701,5)).fullString());
+        assertEquals("Origin failure1","BA5 (26,5)",(new Cell.CellToken(26,5)).fullString());
+        assertEquals("Origin failure1","BAZ5 (701,5)",(new Cell.CellToken(701,5)).fullString());
     }
 }
 
