@@ -3,6 +3,8 @@ package edu.uw.tcss342.schedule;
 
 //import com.sun.javaws.exceptions.InvalidArgumentException;
 
+import sun.plugin.dom.exception.InvalidStateException;
+
 import java.awt.*;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -229,7 +231,7 @@ public class Cell {
                         @Override public double run(double left, double right) {return left * right;}}),
             new BinaryOperatorToken(3,true,"/",
                     new BinaryOperatorRunnable() {
-                        @Override public double run(double left, double right) {return left / right;}}),
+                        @Override public double run(double left, double right) {if(right == 0) throw new IllegalStateException("Divid by zero!"); return left / right;}}),
             new BinaryOperatorToken(4,false,"^",
                     new BinaryOperatorRunnable() {
                         @Override public double run(double left, double right) {return Math.pow(left, right);}})
