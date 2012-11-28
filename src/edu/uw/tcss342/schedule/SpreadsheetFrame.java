@@ -58,7 +58,7 @@ public class SpreadsheetFrame extends JFrame {
    
         
         /**
-         *         	Method for creating the menu for the spreadsheet.
+         *                 Method for creating the menu for the spreadsheet.
          * @return A file menu for the spreadsheet.
          */
         private JMenu menu() { //formerly fileMenu
@@ -162,9 +162,9 @@ public class SpreadsheetFrame extends JFrame {
         	
         	stringbuff2.append("-	To create a new Spreadsheet, simply go to “File”  -> “New”. This will create a blank spreadsheet that has no saved data in it. \n \n");
         	stringbuff2.append("-	This Spreadsheet does not support the user adding or deleting columns/rows. The table size for this Spreadsheet is fixed. It does however support resizing (zooming). \n \n");
-        	stringbuff2.append("-	Changing a cells formula  can be done by double clicking on the cell you wish to change. After double clicking, the cells current formula should appear (nothing will \n" +
+        	stringbuff2.append("-	Changing a cells formula  can be done by simply clicking on the cell you wish to change. After clicking, the cells current formula should appear (nothing will \n" +
         			"				come up if there is no formula) and you can change it however you like. To commit the formula, you must press Enter. Upon pressing enter, the Spreadsheet will update \n " +
-        			"				the cells value, along with any other cell that it depends on it. \n \n");
+        			"				the cells value, along with any other cell that depends on it. \n \n");
         	stringbuff2.append("-	When saving/loading a spreadsheet, you must save/load  with the “.jad” extension. It will not save/load any other extension type.");
         	
         	final Action aboutAction = new AbstractAction("About")
