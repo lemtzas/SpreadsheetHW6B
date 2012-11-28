@@ -2,6 +2,10 @@ package edu.uw.tcss342.schedule;
 
 
 
+
+
+
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -73,18 +77,21 @@ public class SpreadSheet{
     		}
     		catch( IllegalStateException e)
     		{
-    			throw new IllegalStateException(e); 
+    			throw new IllegalStateException(e.getLocalizedMessage()); 
     		}
     	}
     	buildAdjList();
 		try
 		{
-	    	topologicalSort();
-	    	evaluateCells();
+			if (cellMap.size() != 0)
+			{
+		    	topologicalSort();
+		    	evaluateCells();
+			}
 		}
 		catch( IllegalStateException e)
 		{
-			throw new IllegalStateException(e); 
+			throw new IllegalStateException(e.getLocalizedMessage());
 		}
     }
     
@@ -192,7 +199,7 @@ public class SpreadSheet{
     	//if there was no cell with an inDegree of 0, throw this exception.
     	if (startCell == null)
     	{
-    		throw new IllegalStateException("Start Cell not found");
+    		throw new IllegalStateException("Spreadsheet has a cycle - -0");
     	}
     	
     	//Add Cells to the Queue in the order they should be calculated.
