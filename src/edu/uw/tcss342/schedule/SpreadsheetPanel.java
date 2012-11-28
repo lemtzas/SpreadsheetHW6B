@@ -14,6 +14,7 @@ import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
 
+import java.util.Map;
 import java.util.StringTokenizer;
 
 import javax.swing.JLabel;
@@ -310,7 +311,11 @@ public class SpreadsheetPanel extends JPanel {
             public void mouseClicked(MouseEvent the_event) {
                     if (the_event.getClickCount() == 2) {
                             final CellsGUI cellGui = (CellsGUI) the_event.getComponent();
-                            cellGui.setText(cellGui.getToken().toString());
+                            Cell cell = mySpreadsheet.getCellMap().get(cellGui.getToken().toString());
+                            if( cell != null )
+                                cellGui.setText(cell.getFormula());
+                            else
+                                cellGui.setText("");
                             cellGui.setCaretPosition(cellGui.getDocument().getLength());
                     }
             }
@@ -348,6 +353,12 @@ public class SpreadsheetPanel extends JPanel {
                                 final CellsGUI cellGui = (CellsGUI) the_event.getComponent();
                                 //try {
                                        mySpreadsheet.updateCell(cellGui.getToken().toString(), cellGui.getText());
+                                        Map<String,Cell> cells = mySpreadsheet.getCellMap();
+                                        Cell cell = cells.get(cellGui.getToken().toString());
+                                        if( cell != null )
+                                                cellGui.setText(Double.toString(cell.lastValue()));
+                                        else
+                                                cellGui.setText("");
                                // }
                                 
                                 //TODO: Stub for now.
@@ -380,7 +391,7 @@ public class SpreadsheetPanel extends JPanel {
                                         mySpreadsheet.revert(cellGui.getToken());
                                 }
                                 */
-                                update();
+                                //update();
                         }
                 }
         }
