@@ -1,6 +1,4 @@
 package edu.uw.tcss342.schedule;
-package gui;
-
 import java.awt.event.ActionEvent;
 import java.io.File;
 
@@ -14,158 +12,240 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileFilter;
 
-import spreadsheet.Spreadsheet;
+//import SpreadsheetCore;
 
 /**
- * Spreadsheet GUI.
+ * GUI for the Spreadsheet. Frame Class
  * 
- * @author Son Pham
+ * @author Alex Stringham
  * @version 1.0
  */
 @SuppressWarnings("serial")
-public class SpreadSheetGui extends JFrame {
+public class SpreadsheetFrame extends JFrame {
         /**
          * Name of this spreadsheet GUI frame.
          */
-        public static final String FRAME_NAME = "TCSS-342 Simple SpreadSheet";
+        public static final String NAME = "Spreadsheet Program - TCSS 342";
 
         /**
-         * Default number of columns in the spreadsheet.
-         */
-        public static final int NUM_COLS = 12;
-
-        /**
-         * Default number of rows in the spreadsheet.
-         */
-        public static final int NUM_ROWS = 10;
-
-        /**
-         * The main method of SpreadSheetGui.
+         * Main method to run a new instance of the Spreadsheet
          * 
-         * @param the_args
-         *            The command line argument (ignored).
+         * @param the_args : command line.
          */
         public static void main(final String... the_args) {
-                final SpreadSheetGui the_frame = new SpreadSheetGui(new Spreadsheet(
-                                NUM_ROWS, NUM_COLS));
-                the_frame.setUp();
+                final SpreadsheetFrame gui = new SpreadsheetFrame(new SpreadSheet( ));
+                gui.setUp();
         }
-
-        // Constructor
 
         /**
          * The cell table in the spreadsheet GUI.
          */
-        private SpreadSheetBoard my_board;
+        private SpreadsheetPanel panel;
 
         /**
-         * Construct a SpreadSheetGui.
+         * Constructor
          * 
          * @param the_spreadsheet
          *            The spreadsheet.
          */
-        public SpreadSheetGui(final Spreadsheet the_spreadsheet) {
-                super(FRAME_NAME);
-                my_board = new SpreadSheetBoard(the_spreadsheet);
+        public SpreadsheetFrame(final SpreadSheet the_spreadsheet) {
+                super(NAME);
+                panel = new SpreadsheetPanel(the_spreadsheet);
                 setDefaultCloseOperation(EXIT_ON_CLOSE);
         }
 
+        
+   
+        
         /**
-         * 
-         * @return The file menu.
+         *         	Method for creating the menu for the spreadsheet.
+         * @return A file menu for the spreadsheet.
          */
-        private JMenu fileMenu() {
-                final JMenu file_menu = new JMenu("File");
-                file_menu.setMnemonic('F');
-                final JMenuItem reset = new JMenuItem(new AbstractAction("New") {
-                        @Override
+        private JMenu menu() { //formerly fileMenu
+                final JMenu file = new JMenu("File");
+                file.setMnemonic('F');
+                
+                final JMenuItem resetPanel = new JMenuItem(new AbstractAction("New") {
+ 
                         public void actionPerformed(final ActionEvent the_event) {
-                                my_board.reset();
-                                my_board.update();
+                                panel.reset();
+                                panel.update();
                         }
                 });
-                reset.setMnemonic('N');
-                file_menu.add(reset);
-                final JMenuItem open = new JMenuItem(new AbstractAction("Open") {
+                
+                //Menu Action for opening a new spreadsheet
+                resetPanel.setMnemonic('N');
+                file.add(resetPanel);
+                final JMenuItem openAction = new JMenuItem(new AbstractAction("Open") {
                         @Override
                         public void actionPerformed(final ActionEvent the_event) {
-                                JFileChooser fc = new JFileChooser();
-                                fc.addChoosableFileFilter(new SpreadsheetFileFilter());
-                                fc.setAcceptAllFileFilterUsed(false);
-                                int returnVal = fc.showOpenDialog(SpreadSheetGui.this);
+                                JFileChooser chooser = new JFileChooser();
+                                chooser.addChoosableFileFilter(new SpreadsheetExtension());
+                                chooser.setAcceptAllFileFilterUsed(false);
+                                int returnVal = chooser.showOpenDialog(SpreadsheetFrame.this);
                                 if (returnVal == JFileChooser.APPROVE_OPTION)
                                         try {
-                                                my_board.load(fc.getSelectedFile().getCanonicalPath());
+                                                panel.load(chooser.getSelectedFile().getCanonicalPath());
                                         } catch (Exception e) {
                                         }
-                                my_board.update();
+                                panel.update();
                         }
                 });
-                open.setMnemonic('O');
-                file_menu.add(open);
-                final JMenuItem save = new JMenuItem(new AbstractAction("Save") {
+                openAction.setMnemonic('O');
+                file.add(openAction);
+                
+                //Menu Item for saving a spreadsheet
+                final JMenuItem saveAction = new JMenuItem(new AbstractAction("Save") {
                         @Override
                         public void actionPerformed(final ActionEvent the_event) {
-                                JFileChooser fc = new JFileChooser();
-                                fc.addChoosableFileFilter(new SpreadsheetFileFilter());
-                                fc.setAcceptAllFileFilterUsed(false);                           
-                                int returnVal = fc.showSaveDialog(SpreadSheetGui.this);
-                                if (returnVal == JFileChooser.APPROVE_OPTION)
+                                JFileChooser chooser = new JFileChooser();
+                                chooser.addChoosableFileFilter(new SpreadsheetExtension());
+                                chooser.setAcceptAllFileFilterUsed(false);                           
+                                int value = chooser.showSaveDialog(SpreadsheetFrame.this);
+                                if (value == JFileChooser.APPROVE_OPTION)
                                         try {
-                                          String file_path = fc.getSelectedFile().getCanonicalPath();
-                                          String extension = file_path.substring(file_path.length() - 4);
-                                          String mst = ".mst";
-                                          if (!extension.equals(mst))
+                                          String path = chooser.getSelectedFile().getCanonicalPath();
+                                          String fileExtension = path.substring(path.length() - 4);
+                                          String jad = ".jad";
+                                          if (!fileExtension.equals(jad))
                                           {
-                                            file_path = file_path.concat(mst);
+                                            path = path.concat(jad);
                                           }
-                                          my_board.save(file_path);
+                                          panel.save(path);
                                         } catch (Exception e) { }
-                                my_board.update();
+                                panel.update();
                         }
                 });
-                save.setMnemonic('S');
-                file_menu.add(save);
-                file_menu.addSeparator();
-                final Action close = new AbstractAction("Quit") {
+                
+                saveAction.setMnemonic('S');
+                file.add(saveAction);
+                file.addSeparator();
+                
+                //Menu Item for exiting the spreadsheet
+                final Action quit = new AbstractAction("Quit") {
                         public void actionPerformed(final ActionEvent the_event) {
                                 dispose();
                         }
                 };
-                final JMenuItem quit = new JMenuItem(close);
-                quit.setMnemonic('Q');
-                file_menu.add(quit);
-                return file_menu;
+                
+                final JMenuItem exit = new JMenuItem(quit);
+                exit.setMnemonic('Q');
+                file.add(quit);
+                return file;
+        }
+        
+
+        /**
+         * @return The menu bar.
+         */
+        private JMenuBar Bar() {
+                final JMenuBar menuBar = new JMenuBar();
+                menuBar.add(menu());
+                // menu_bar.add(editMenu());
+                menuBar.add(help());
+                return menuBar;
         }
         
         /**
-         * File filter class for simple spreadsheet extension (.mst)
-         * @author Son Pham
-         * @version 1.0
+         * 
+         * @return Help menu.
          */
-        public class SpreadsheetFileFilter extends FileFilter
+        private JMenu help() {
+        	final StringBuffer stringbuff = new StringBuffer();
+        	final StringBuffer stringbuff2 = new StringBuffer();
+        	final JMenu help = new JMenu("Help");
+        	help.setMnemonic('H');
+        
+        	stringbuff.append("Awesome Development Crew: \n");
+        	stringbuff.append("David - Jacob - Alex \n");
+        	stringbuff.append("Spreadsheet Project v1.0");
+        	
+        	stringbuff2.append("-	To create a new Spreadsheet, simply go to “File”  -> “New”. This will create a blank spreadsheet that has no saved data in it. \n \n");
+        	stringbuff2.append("-	This Spreadsheet does not support the user adding or deleting columns/rows. The table size for this Spreadsheet is fixed. It does however support resizing (zooming). \n \n");
+        	stringbuff2.append("-	Changing a cells formula  can be done by double clicking on the cell you wish to change. After double clicking, the cells current formula should appear (nothing will \n" +
+        			"				come up if there is no formula) and you can change it however you like. To commit the formula, you must press Enter. Upon pressing enter, the Spreadsheet will update \n " +
+        			"				the cells value, along with any other cell that it depends on it. \n \n");
+        	stringbuff2.append("-	When saving/loading a spreadsheet, you must save/load  with the “.jad” extension. It will not save/load any other extension type.");
+        	
+        	final Action aboutAction = new AbstractAction("About")
+        	{
+        		public void actionPerformed(final ActionEvent event)
+        		{
+        		JOptionPane.showMessageDialog(null, stringbuff, "About Spreadsheet", 1);
+        		}
+        	};
+        	
+        	JMenuItem about = new JMenuItem(aboutAction);
+        	about.setMnemonic('A');
+        	
+        	final Action instructionsAction = new AbstractAction("Instructions")
+        	{
+        		public void actionPerformed(final ActionEvent event)
+        		{
+        			JOptionPane.showMessageDialog(null, stringbuff2, "Users Guide", 1);
+        		}
+        	};
+        	
+        	JMenuItem instructions = new JMenuItem(instructionsAction);
+        	instructions.setMnemonic('I');
+        	help.add(instructionsAction);
+        	help.add(aboutAction);
+
+                
+            return help;
+        }
+
+
+
+
+        
+        /**
+         * Filter to only accept our extension type, .jad
+         * @author Alex Stringham
+         * 
+         */
+        public class SpreadsheetExtension extends FileFilter
         {
           /**
-           * Extension .mst
+           * String to declare our file extension.
            */
-          public final static String mst = "mst";
+          public final static String jad = "jad";
           
           /**
-           * Whether the given file is accepted by this filter.
-           * @param f The file.
-           * @return True if the file's extension is "mst". False otherwise.
+           * Getter for returning the extension of a given file.
+           * @param file : the chosen file.
+           */  
+          public String getExt(File file) {
+        	  String fileName = file.getName();
+              String extension = null;
+             
+              int i = fileName.lastIndexOf('.');
+
+              if (i > 0 &&  i < fileName.length() - 1) {
+                  extension = fileName.substring(i+1).toLowerCase();
+              }
+              return extension;
+          }
+
+          
+          /**
+           * Checks to see whether a chosen file is the type that
+           * this spreadsheet accepts.
+           * 
+           * @param file : the chosen file by the user.
+           * @return : True is the file extension is .jad, false otherwise.
            */
-          public boolean accept(final File f)
+          public boolean accept(final File file)
           {
-            if (f.isDirectory())
+            if (file.isDirectory())
             {
               return true;
             }
             
-            String extension = getExtension(f);
-            if (extension != null)
+            String fileExtension = getExt(file);
+            if (fileExtension != null)
             {
-              if (extension.equals(mst))
+              if (fileExtension.equals(jad))
               {
                 return true;
               }
@@ -177,68 +257,21 @@ public class SpreadSheetGui extends JFrame {
             return false;
           }
           
-          /**
-           * Get the extension of a file.
-           * @param f The file.
-           */  
-          public String getExtension(File f) {
-              String ext = null;
-              String s = f.getName();
-              int i = s.lastIndexOf('.');
-
-              if (i > 0 &&  i < s.length() - 1) {
-                  ext = s.substring(i+1).toLowerCase();
-              }
-              return ext;
-          }
-
           @Override
           public String getDescription() {
-            return "Simple Spreadsheet (.mst)";
+            return "Spreadsheet";
           }
+          
+          
+       
         }
         
         /**
-         * 
-         * @return Help menu.
-         */
-        private JMenu helpMenu() {
-                final JMenu help_menu = new JMenu("Help");
-                help_menu.setMnemonic('H');
-                final StringBuffer sb = new StringBuffer();
-                sb.append("Authors: \n");
-                sb.append("Miles Raymond - Teddy Doll - Son Pham\n");
-                sb
-                                .append("Documentation: http://code.google.com/p/spreadsheet-mst/wiki/HowToUseTheSpreadsheet");
-                final Action about = new AbstractAction("About...") {
-                        public void actionPerformed(final ActionEvent the_event) {
-                                JOptionPane.showMessageDialog(null, sb,
-                                                "About Simple Spreadsheet", 1);
-                        }
-                };
-                JMenuItem menu_item = new JMenuItem(about);
-                menu_item.setMnemonic('A');
-                help_menu.add(menu_item);
-                return help_menu;
-        }
-
-        /**
-         * @return The menu bar.
-         */
-        private JMenuBar menuBar() {
-                final JMenuBar menu_bar = new JMenuBar();
-                menu_bar.add(fileMenu());
-                // menu_bar.add(editMenu());
-                menu_bar.add(helpMenu());
-                return menu_bar;
-        }
-
-        /**
-         * Setup the GUI.
+         * Method for setting up the components needed for Spreadsheet GUI.
          */
         public void setUp() {
-                add(my_board);
-                setJMenuBar(menuBar());
+                add(panel);
+                setJMenuBar(Bar());
                 pack();
                 setVisible(true);
         }
