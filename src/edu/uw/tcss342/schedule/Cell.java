@@ -31,6 +31,7 @@ public class Cell {
 
     public Cell(final String id, final String formula) {
         this.id = id;
+        this.last_value = 0;
         this.formula = formula;
         dependencies = new HashSet<String>();
         parse();
@@ -61,6 +62,7 @@ public class Cell {
         last_value = values.pop();
         return last_value;
     }
+
 
     public Double lastValue() {
         return last_value;
@@ -252,7 +254,7 @@ public class Cell {
                 int value = Character.getNumericValue(temp_ident_remain.charAt(0));
 
                 //get value from letter
-                value = value - 9;
+                value = value - 10;
 
                 //add to value
                 column *= 26;
@@ -262,12 +264,37 @@ public class Cell {
             row = Integer.parseInt(temp_ident_remain); //the match
         }
 
+        public CellToken(int col, int row) {
+            this.row = row;
+            this.column = col;
+            identifier = this.columnString() + Integer.toString(row);
+        }
+
         public double value(Map<String,Double> values) {
             return values.get(this.identifier);
         }
 
         public String toString() {
             return identifier;// + " (" + column + "," + row + ")";
+        }
+
+        public String fullString() {
+            return identifier + " (" + column + "," + row + ")";
+        }
+
+        public String columnString() {
+            StringBuffer stringBuff = new StringBuffer();
+            int digit = this.column % 26;
+            int remain = (this.column-digit) / 26;
+            char letter = (char) (digit + 'A');
+            stringBuff.append(letter);
+            while (remain > 0) {
+                digit = (remain - 1) % 26;
+                remain = remain / 26;
+                letter = (char) (digit + 'A');
+                stringBuff.insert(0, letter);
+            }
+            return stringBuff.toString();
         }
     }
 }

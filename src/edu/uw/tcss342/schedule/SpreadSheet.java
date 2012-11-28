@@ -23,7 +23,7 @@ import java.util.Set;
 public class SpreadSheet extends Observable{
 	//the List of Cells that are currently active in the spreadsheet.  All Cells not 
 	//included in this List have the value 0.
-    private List<Cell> activeCells;
+    private List<Cell> activeCells = new ArrayList<Cell>();
     
     //Maps the Cell's name to the Cell Object
     private Map<String, Cell> cellMap = new HashMap<String, Cell>();
@@ -32,10 +32,10 @@ public class SpreadSheet extends Observable{
     private Map<String, Double> cellValues = new HashMap<String, Double>();
     
     //The adjacency list used in topological sort
-    private HashMap<String, List<String>> adjList;
+    private HashMap<String, List<String>> adjList = new HashMap<String,List<String>>();
     
     //The Queue that holds the Cells in the order they should be evaluated in.
-	private Queue<Cell> cellEvalQueue;
+	private Queue<Cell> cellEvalQueue = new LinkedList<Cell>();
 
     
     /*

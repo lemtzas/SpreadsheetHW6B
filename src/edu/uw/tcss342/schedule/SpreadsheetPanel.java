@@ -86,7 +86,7 @@ public class SpreadsheetPanel extends JPanel {
     /**
      * A cell in the spreadsheet.
      */
-    private Cell myCell;
+    private Cell myCell = null;
 
     /**
      * Construct a spreadsheet board from the input.
@@ -105,23 +105,23 @@ public class SpreadsheetPanel extends JPanel {
             
             setPreferredSize(new Dimension(myColumns * cellWidth, myRows * cellHeight));
             cellArray = new CellsGUI[myRows][myColumns];
-            //initialize();
+            initialize();
     }
 
     
     /**
      * Initializes the array of cells and places them in the panel.
-     
+     */
     private void initialize() {
             for (int i = -1; i < myRows; i++)
                     for (int j = -1; j < myColumns; j++) {
-                        Cell.CellToken cellToken = new Cell.CellToken(myCell.id);   
+                        Cell.CellToken cellToken = new Cell.CellToken(j,i);
 
                             if (i == -1) {
                                     if (j == -1)
                                             add(new JLabel("", null, SwingConstants.CENTER));
                                     else
-                                            add(new JLabel(cellToken.toString(), null,SwingConstants.CENTER));
+                                            add(new JLabel(cellToken.columnString(), null,SwingConstants.CENTER));
                             } else if (j == -1)
                                     add(new JLabel(Integer.toString(i), null,SwingConstants.CENTER));
                             else {
@@ -136,8 +136,6 @@ public class SpreadsheetPanel extends JPanel {
                             }
                     }
     }
-    
-    */
     
     /**
      * Updates each cells values.
@@ -195,7 +193,9 @@ public class SpreadsheetPanel extends JPanel {
      * @param the_cell
      */
     private void setCellText(final CellsGUI the_cell) {
-    	
+    	if(the_cell == null) return;
+        if(myCell == null) return;
+
     	double cellValue = myCell.last_value;
     	String textValue = String.valueOf(cellValue);
     	
@@ -231,7 +231,7 @@ public class SpreadsheetPanel extends JPanel {
 
     /**
      * Load a saved spreadsheet.
-     * @param canonicalPath
+     * @param path
      */
     public void load(String path) throws Exception {
             BufferedReader input = new BufferedReader(new FileReader(path));

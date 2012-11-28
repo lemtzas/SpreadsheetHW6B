@@ -22,15 +22,15 @@ public class CellTest {
 
     @Test
     public void testTokenCell() {
-//        assertEquals("Origin failure",(new Cell.CellToken("A1")).toString(),"A1 (1,1)");
-//        assertEquals("Origin failure",(new Cell.CellToken("A4")).toString(),"A4 (1,4)");
-//        assertEquals("Origin failure",(new Cell.CellToken("A67")).toString(),"A67 (1,67)");
-//        assertEquals("Origin failure",(new Cell.CellToken("A-67")).toString(),"A-67 (1,-67)");
-//        assertEquals("Origin failure",(new Cell.CellToken("C5")).toString(),"C5 (3,5)");
-//        assertEquals("Origin failure",(new Cell.CellToken("F5")).toString(),"F5 (6,5)");
-//        assertEquals("Origin failure",(new Cell.CellToken("Z5")).toString(),"Z5 (26,5)");
-//        assertEquals("Origin failure",(new Cell.CellToken("AA5")).toString(),"AA5 (27,5)");
-//        assertEquals("Origin failure",(new Cell.CellToken("ZZ5")).toString(),"ZZ5 (702,5)");
+        assertEquals("Origin failure",(new Cell.CellToken("A1")).fullString(),"A1 (0,1)");
+        assertEquals("Origin failure",(new Cell.CellToken("A4")).fullString(),"A4 (0,4)");
+        assertEquals("Origin failure",(new Cell.CellToken("A67")).fullString(),"A67 (0,67)");
+        assertEquals("Origin failure",(new Cell.CellToken("A-67")).fullString(),"A-67 (0,-67)");
+        assertEquals("Origin failure",(new Cell.CellToken("C5")).fullString(),"C5 (2,5)");
+        assertEquals("Origin failure",(new Cell.CellToken("F5")).fullString(),"F5 (5,5)");
+        assertEquals("Origin failure",(new Cell.CellToken("Z5")).fullString(),"Z5 (25,5)");
+        assertEquals("Origin failure",(new Cell.CellToken("AA5")).fullString(),"AA5 (26,5)");
+        assertEquals("Origin failure",(new Cell.CellToken("ZZ5")).fullString(),"ZZ5 (701,5)");
     }
 
     @Test
@@ -78,6 +78,22 @@ public class CellTest {
 
         assertEquals("Evaluate: Complex Formula, No References"              ,  (Double)3.0001220703125,  (Double)new Cell("A1","3 + 4 * 2 / ( 1 - 5 ) ^ 2 ^ 3").evaluate(deps));
         assertEquals("Evaluate: Complex Formula, References"                 ,  (Double)3.0001220703125,  (Double)new Cell("A1","A3 + 4 * DEUS2 / ( ONE1 - ZZTOP1337 ) ^ DEUS2 ^ A3").evaluate(deps));
+    }
+
+
+
+    @Test
+    public void idConversionTest() {
+        assertEquals("Origin failure1","Y5 (24,5)",(new Cell.CellToken(24,5)).fullString());
+        assertEquals("Origin failure1","Z5 (25,5)",(new Cell.CellToken(25,5)).fullString());
+        assertEquals("Origin failure1","A0 (0,0)",(new Cell.CellToken(0,0)).fullString());
+        assertEquals("Origin failure1","A4 (0,4)",(new Cell.CellToken(0,4)).fullString());
+        assertEquals("Origin failure1","A67 (0,67)",(new Cell.CellToken(0,67)).fullString());
+        assertEquals("Origin failure1","A-67 (0,-67)",(new Cell.CellToken(0,-67)).fullString());
+        assertEquals("Origin failure1","C5 (2,5)",(new Cell.CellToken(2,5)).fullString());
+        assertEquals("Origin failure1","F5 (5,5)",(new Cell.CellToken(5,5)).fullString());
+        assertEquals("Origin failure1","AA5 (26,5)",(new Cell.CellToken(26,5)).fullString());
+        assertEquals("Origin failure1","ZZ5 (701,5)",(new Cell.CellToken(701,5)).fullString());
     }
 }
 

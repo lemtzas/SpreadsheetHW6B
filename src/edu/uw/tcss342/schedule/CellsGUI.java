@@ -1,5 +1,6 @@
-import javax.swing.JTextField;
+package edu.uw.tcss342.schedule;
 
+import javax.swing.JTextField;
 
 //import CellToken;
 
