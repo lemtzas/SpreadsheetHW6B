@@ -61,11 +61,11 @@ public class SpreadsheetPanel extends JPanel {
 	 * The cell array of this spreadsheet.
 	 */
 	private CellsGUI[][] cellArray;
-	
-    /**
-     * Maps the Cell's name to the Cell Object
-     */
-    private Map<String, Cell> cellMap = new HashMap<String, Cell>();
+
+	/**
+	 * Maps the Cell's name to the Cell Object
+	 */
+	private Map<String, Cell> cellMap = new HashMap<String, Cell>();
 
 	/**
 	 * The cell's height.
@@ -195,8 +195,7 @@ public class SpreadsheetPanel extends JPanel {
 	/**
 	 * Sets the width of each cell.
 	 * 
-	 * @param the_width
-	 *            : width of the cell.
+	 * @param the_width : width of the cell.
 	 * 
 	 */
 	public void setCellWidth(final int the_width) {
@@ -213,8 +212,8 @@ public class SpreadsheetPanel extends JPanel {
 	 */
 	private void setCellText(final CellsGUI the_cell) {
 
-//		if (the_cell == null)
-//			return;
+		// if (the_cell == null)
+		// return;
 		Cell cell = cellMap.get(the_cell.getToken().toString());
 		myCell = cell;
 		if (myCell == null)
@@ -226,7 +225,7 @@ public class SpreadsheetPanel extends JPanel {
 		} else {
 			the_cell.setText("");
 		}
-		
+
 		double cellValue = roundDecimal(myCell.last_value);
 		String textValue = String.valueOf(cellValue);
 
@@ -235,21 +234,22 @@ public class SpreadsheetPanel extends JPanel {
 		else
 			the_cell.setText(textValue);
 	}
-//	private void setCellText(final CellsGUI the_cell) {
-//		if (the_cell == null)
-//			return;
-//		if (myCell == null)
-//			return;
-//
-//		double cellValue = myCell.last_value;
-//		String textValue = String.valueOf(cellValue);
-//
-//		if (myCell.formula == null)
-//			the_cell.setText("");
-//		else
-//			the_cell.setText(textValue);
-//
-//	}
+
+	// private void setCellText(final CellsGUI the_cell) {
+	// if (the_cell == null)
+	// return;
+	// if (myCell == null)
+	// return;
+	//
+	// double cellValue = myCell.last_value;
+	// String textValue = String.valueOf(cellValue);
+	//
+	// if (myCell.formula == null)
+	// the_cell.setText("");
+	// else
+	// the_cell.setText(textValue);
+	//
+	// }
 
 	/**
 	 * Getter for the cells height.
@@ -294,15 +294,15 @@ public class SpreadsheetPanel extends JPanel {
 				if (output.equals(empty)) {
 					tokenNumber++;
 				} else {
-		    		try
-		    		{
-						mySpreadsheet.updateCell(stringToken.toString(), output);
+					try {
+						mySpreadsheet
+								.updateCell(stringToken.toString(), output);
 						tokenNumber++;
-		    		}
-		    		catch( IllegalStateException e)
-		    		{
-		    			JOptionPane.showMessageDialog(null, e.getLocalizedMessage(), "alert", JOptionPane.ERROR_MESSAGE);
-		    		}
+					} catch (IllegalStateException e) {
+						JOptionPane.showMessageDialog(null,
+								e.getLocalizedMessage(), "alert",
+								JOptionPane.ERROR_MESSAGE);
+					}
 				}
 			}
 			lineNumber++;
@@ -345,7 +345,7 @@ public class SpreadsheetPanel extends JPanel {
 	private class MouseCellListener extends MouseAdapter {
 
 		public void mouseClicked(MouseEvent the_event) {
-			if (the_event.getClickCount() == 2) {
+			
 				final CellsGUI cellGui = (CellsGUI) the_event.getComponent();
 				focusFlag = true;
 				if (focusFlag) {
@@ -360,8 +360,6 @@ public class SpreadsheetPanel extends JPanel {
 				else
 					cellGui.setText("");
 				cellGui.setCaretPosition(cellGui.getDocument().getLength());
-
-			}
 		}
 	}
 
@@ -390,22 +388,20 @@ public class SpreadsheetPanel extends JPanel {
 	 */
 	private class KeyCellListener extends KeyAdapter {
 
-		@SuppressWarnings("deprecation")
 		public void keyPressed(KeyEvent the_event) {
 			if (the_event.getKeyCode() == KeyEvent.VK_ENTER) {
 				final CellsGUI cellGui = (CellsGUI) the_event.getComponent();
 
-	    		try
-	    		{
-	    			mySpreadsheet.updateCell(cellGui.getToken().toString(),
+				try {
+					mySpreadsheet.updateCell(cellGui.getToken().toString(),
 							cellGui.getText());
-	    		}
-	    		catch( IllegalStateException e)
-	    		{
-	    			JOptionPane.showMessageDialog(null, e.getLocalizedMessage(), "alert", JOptionPane.ERROR_MESSAGE);
-	    		}
+				} catch (IllegalStateException e) {
+					JOptionPane.showMessageDialog(null,
+							e.getLocalizedMessage(), "alert",
+							JOptionPane.ERROR_MESSAGE);
+				}
 				cellMap = mySpreadsheet.getCellMap();
-							
+
 				Cell cell = cellMap.get(cellGui.getToken().toString());
 
 				if (cell != null) {
@@ -425,37 +421,38 @@ public class SpreadsheetPanel extends JPanel {
 			}
 		}
 	}
-//	private class KeyCellListener extends KeyAdapter {
-//
-//		public void keyPressed(KeyEvent the_event) {
-//			if (the_event.getKeyCode() == KeyEvent.VK_ENTER) {
-//				final CellsGUI cellGui = (CellsGUI) the_event.getComponent();
-//
-//				mySpreadsheet.updateCell(cellGui.getToken().toString(),
-//						cellGui.getText());
-//				Map<String, Cell> cells = mySpreadsheet.getCellMap();
-//				
-//				
-//				Cell cell = cells.get(cellGui.getToken().toString());
-//
-//				if (cell != null) {
-//					double value = 0;
-//					value = roundDecimal(cell.last_value);
-//					cellGui.setText(Double.toString(value));
-//				} else {
-//					cellGui.setText("");
-//				}
-//
-//				focusFlag = false;
-//				if (!focusFlag) {
-//					cellGui.setBackground(Color.WHITE);
-//					cellGui.setForeground(Color.black);
-//				}
-//
-//			}
-//
-//		}
-//	}
+
+	// private class KeyCellListener extends KeyAdapter {
+	//
+	// public void keyPressed(KeyEvent the_event) {
+	// if (the_event.getKeyCode() == KeyEvent.VK_ENTER) {
+	// final CellsGUI cellGui = (CellsGUI) the_event.getComponent();
+	//
+	// mySpreadsheet.updateCell(cellGui.getToken().toString(),
+	// cellGui.getText());
+	// Map<String, Cell> cells = mySpreadsheet.getCellMap();
+	//
+	//
+	// Cell cell = cells.get(cellGui.getToken().toString());
+	//
+	// if (cell != null) {
+	// double value = 0;
+	// value = roundDecimal(cell.last_value);
+	// cellGui.setText(Double.toString(value));
+	// } else {
+	// cellGui.setText("");
+	// }
+	//
+	// focusFlag = false;
+	// if (!focusFlag) {
+	// cellGui.setBackground(Color.WHITE);
+	// cellGui.setForeground(Color.black);
+	// }
+	//
+	// }
+	//
+	// }
+	// }
 
 	double roundDecimal(double d) {
 		DecimalFormat round = new DecimalFormat("#.##");
